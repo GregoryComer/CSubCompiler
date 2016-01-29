@@ -22,15 +22,15 @@ namespace CSubCompiler.AST
             return new ExpressionNode(exp);
         }
 
-        public static ISubExpressionNode ParseQ(Token[] tokens, ref int i, int q)
+        public static ISubExpressionNode ParseQ(Token[] tokens, ref int i, int q) //Predence climbing algorithm (q represents minimum precedence handled by this loop)
         {
-            ISubExpressionNode val = ParseP(tokens, ref i, q);
+            ISubExpressionNode val = ParseSubExpression(tokens, ref i, q);
             while (i < tokens.Length && BinaryOperatorNode.IsBinaryOperator(tokens, i))
             {
                 BinaryOperatorType opType = Operators.BinaryOperatorTokenTable[tokens[i].Type];
                 OperatorAssociativity opAssoc = Operators.BinaryOperatorAssociativityTable[opType];
                 int opPrecedence = Operators.BinaryOperatorPrecedenceTable[opType];
-                if (opPrecedence <= q)
+                if (opPrecedence <= q) //Lower precedence values indicate higher precedence
                 {
                     i++; //Consume operator
                     ISubExpressionNode right = ParseQ(tokens, ref i, (opAssoc == OperatorAssociativity.Left) ? opPrecedence - 1 : opPrecedence);
@@ -51,7 +51,7 @@ namespace CSubCompiler.AST
             return val;
         }
 
-        public static ISubExpressionNode ParseP(Token[] tokens, ref int i, int q)
+        public static ISubExpressionNode ParseSubExpression(Token[] tokens, ref int i, int q)
         {
             if (tokens[i].Type == TokenType.LeftParen) //Expression in parenthesis
             {
