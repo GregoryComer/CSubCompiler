@@ -67,7 +67,7 @@ namespace CSubCompiler.AST
                 i++; //Advance over join token
                 if (tokens[i].Type != TokenType.AlphaNum) //Joins should be followed by AlphaNum
                 {
-                    throw new ParserException(string.Format("Expected identifier following \"{0}\"", tokens[i - 1].Literal), tokens[i].CodeIndex, i, tokens[i]);
+                    throw new ParserException(string.Format("Expected identifier following \"{0}\"", tokens[i - 1].Literal), i, tokens[i]);
                 }
                 parts.Add(tokens[i].Literal);
                 i++; //Advance over AlphaNum part

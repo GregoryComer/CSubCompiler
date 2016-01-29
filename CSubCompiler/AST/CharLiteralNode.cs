@@ -28,7 +28,7 @@ namespace CSubCompiler.AST
         {
             if (tokens[i].Literal.Length > 1)
             {
-                throw new ParserException("Invalid char literal.", tokens[i].CodeIndex, i, tokens[i]); //Should not occur. Any invalid char literals should be caught by lexer. This is a fallback.
+                throw new ParserException("Invalid char literal.", i, tokens[i]); //Should not occur. Any invalid char literals should be caught by lexer. This is a fallback.
             }
             char value = tokens[i].Literal[0];
             i++; //Consume token

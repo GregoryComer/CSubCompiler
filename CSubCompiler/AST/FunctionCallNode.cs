@@ -41,7 +41,7 @@ namespace CSubCompiler.AST
                 args.Add(arg);
                 if (tokens[i].Type != TokenType.Comma && tokens[i].Type != TokenType.RightParen)
                 {
-                    throw new ParserException("Expected delimiter or closing paren.", tokens[i].CodeIndex, i, tokens[i]);
+                    throw new ParserException("Expected delimiter or closing paren.", i, tokens[i]);
                 }
                 i++;
             }

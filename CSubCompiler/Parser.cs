@@ -12,7 +12,7 @@ namespace CSubCompiler
         {
             if (tokens[i].Type != type) //Throw exception if token type does not match expected
             {
-                throw new ParserException(string.Format("Expected token of type {0}.", type.ToString()), tokens[i].CodeIndex, i, tokens[i]);
+                throw new ParserException(string.Format("Expected token of type {0}.", type.ToString()), i, tokens[i]);
             }
             else //Consume token
             {
@@ -25,11 +25,11 @@ namespace CSubCompiler
         {
             if (tokens[i].Type != type) //Throw exception if token type does not match expected
             {
-                throw new ParserException(string.Format("Expected token of type {0}.", type.ToString()), tokens[i].CodeIndex, i, tokens[i]);
+                throw new ParserException(string.Format("Expected token of type {0}.", type.ToString()), i, tokens[i]);
             }
             else if (tokens[i].Literal != literal)
             {
-                throw new ParserException(string.Format("Expected literal \"{0}\".", literal.ToString()), tokens[i].CodeIndex, i, tokens[i]);
+                throw new ParserException(string.Format("Expected literal \"{0}\".", literal.ToString()), i, tokens[i]);
             }
             else //Consume token
             {

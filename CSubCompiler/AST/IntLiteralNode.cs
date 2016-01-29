@@ -29,7 +29,7 @@ namespace CSubCompiler.AST
             int value;
             if (!int.TryParse(tokens[i].Literal, out value))
             {
-                throw new ParserException("Invalid integer literal.", tokens[i].CodeIndex, i, tokens[i]); //Should not occur. Any invalid int literals should be caught by lexer. This is a fallback.
+                throw new ParserException("Invalid integer literal.", i, tokens[i]); //Should not occur. Any invalid int literals should be caught by lexer. This is a fallback.
             }
             i++; //Consume token
             return new IntLiteralNode(value);

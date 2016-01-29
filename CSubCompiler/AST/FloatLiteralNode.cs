@@ -29,7 +29,7 @@ namespace CSubCompiler.AST
             float value;
             if (!float.TryParse(tokens[i].Literal, out value))
             {
-                throw new ParserException("Invalid float literal.", tokens[i].CodeIndex, i, tokens[i]); //Should not occur. Any invalid float literals should be caught by lexer. This is a fallback.
+                throw new ParserException("Invalid float literal.", i, tokens[i]); //Should not occur. Any invalid float literals should be caught by lexer. This is a fallback.
             }
             i++; //Consume token
             return new FloatLiteralNode(value);

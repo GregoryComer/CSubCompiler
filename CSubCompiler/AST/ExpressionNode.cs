@@ -81,7 +81,7 @@ namespace CSubCompiler.AST
             }
             else
             {
-                throw new ParserException("Unexpected token.", tokens[i].CodeIndex, i, tokens[i]);
+                throw new ParserException("Unexpected token.", i, tokens[i]);
             }
         }
     }
