@@ -54,7 +54,7 @@ namespace CSubCompiler.AST
             }
 
             parts.Add(tokens[i++].Literal);
-            while (i < tokens.Length && (tokens[i].Type == TokenType.Dot || tokens[i].Type == TokenType.Arrow))
+            while (i < tokens.Length && (tokens[i].Type == TokenType.Dot || tokens[i].Type == TokenType.Arrow) && !tokens[i].WhitespaceBefore)
             {
                 if (tokens[i].Type == TokenType.Dot)
                 {
@@ -79,6 +79,31 @@ namespace CSubCompiler.AST
         public static bool IsIdentifier(Token[] tokens, int i) //Todo: Determine if below logic is sufficient and unambigous
         {
             return (tokens[i].Type == TokenType.AlphaNum) && !Keywords.IsKeyword(tokens[i].Literal);
+        }
+
+        /// <summary>
+        /// Returns the length of an identifier starting at token index i. Returns -1 if the element at index i is not an identifier.
+        /// </summary>
+        public static int PeekIdentifierLength(Token[] tokens, int i)
+        {
+            int startIndex = 0;
+
+            if (tokens[i].Type != TokenType.AlphaNum)
+            {
+                return -1;
+            }
+            i++; //Pass over initial token
+            while (i < tokens.Length && (tokens[i].Type == TokenType.Dot || tokens[i].Type == TokenType.Arrow) && !tokens[i].WhitespaceBefore)
+            {
+                i++; //Advance over join token
+                if (tokens[i].Type != TokenType.AlphaNum) //Joins should be followed by AlphaNum
+                {
+                    return -1;
+                }
+                i++; //Advance over AlphaNum part
+            }
+
+            return i - startIndex;
         }
 
         /// <summary>

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CSubCompiler.AST
 {
-    public class ContinueNode
+    public class ContinueNode : StatementNode
     {
         public ContinueNode()
         {
@@ -18,7 +18,7 @@ namespace CSubCompiler.AST
             return tokens[i].Type == TokenType.AlphaNum && tokens[i].Literal == "continue";
         }
 
-        public static ContinueNode Parse(Token[] tokens, ref int i)
+        public static new ContinueNode Parse(Token[] tokens, ref int i)
         {
             Parser.ExpectLiteral(tokens, ref i, TokenType.AlphaNum, "continue");
             return new ContinueNode();

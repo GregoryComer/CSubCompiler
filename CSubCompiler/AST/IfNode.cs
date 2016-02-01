@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CSubCompiler.AST
 {
-    public class IfNode : Node
+    public class IfNode : StatementNode
     {
         public ExpressionNode Condition
         {
@@ -41,7 +41,7 @@ namespace CSubCompiler.AST
             return tokens[i].Type == TokenType.AlphaNum && tokens[i].Literal == "if";
         }
 
-        public static IfNode ParseIf(Token[] tokens, ref int i)
+        public static new IfNode Parse(Token[] tokens, ref int i)
         {
             Parser.ExpectLiteral(tokens, ref i, TokenType.AlphaNum, "if");
             Parser.Expect(tokens, ref i, TokenType.LeftParen);

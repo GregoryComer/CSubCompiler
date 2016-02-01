@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CSubCompiler.AST
 {
-    public class ForNode : Node
+    public class ForNode : StatementNode
     {
         public StatementNode Initialization //Can be null
         {
@@ -42,7 +42,7 @@ namespace CSubCompiler.AST
             return tokens[i].Type == TokenType.AlphaNum && tokens[i].Literal == "for";
         }
 
-        public static ForNode Parse(Token[] tokens, ref int i)
+        public static new ForNode Parse(Token[] tokens, ref int i)
         {
             Parser.ExpectLiteral(tokens, ref i, TokenType.AlphaNum, "for");
             Parser.Expect(tokens, ref i, TokenType.LeftParen);
@@ -51,15 +51,17 @@ namespace CSubCompiler.AST
             StatementNode afterthought = null;
             if (tokens[i].Type != TokenType.Semicolon) //Check for initialization statement
             {
-                initialization = StatementNode.Parse(tokens, ref i);
+                initialization = StatementNode.ParseEmbedded(tokens, ref i);
             }
+            Parser.Expect(tokens, ref i, TokenType.Semicolon);
             if (tokens[i].Type != TokenType.Semicolon) //Check for condition expression
             {
                 condition = ExpressionNode.Parse(tokens, ref i);
             }
+            Parser.Expect(tokens, ref i, TokenType.Semicolon);
             if (tokens[i].Type != TokenType.RightParen) //Check for afterthought statement
             {
-                afterthought = StatementNode.Parse(tokens, ref i);
+                afterthought = StatementNode.ParseEmbedded(tokens, ref i);
             }
             Parser.Expect(tokens, ref i, TokenType.RightParen);
             BlockNode body = BlockNode.Parse(tokens, ref i);

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CSubCompiler.AST
 {
-    public class BreakNode
+    public class BreakNode : StatementNode
     {
         public BreakNode()
         {
@@ -18,7 +18,7 @@ namespace CSubCompiler.AST
             return tokens[i].Type == TokenType.AlphaNum && tokens[i].Literal == "break";
         }
 
-        public static BreakNode Parse(Token[] tokens, ref int i)
+        public static new BreakNode Parse(Token[] tokens, ref int i)
         {
             Parser.ExpectLiteral(tokens, ref i, TokenType.AlphaNum, "break");
             return new BreakNode();

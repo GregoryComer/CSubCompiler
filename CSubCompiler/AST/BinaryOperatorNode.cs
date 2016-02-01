@@ -9,9 +9,21 @@ namespace CSubCompiler.AST
 {
     public class BinaryOperatorNode : OperatorNode
     {
-        public BinaryOperatorType OperatorType;
-        public ISubExpressionNode LeftOperand;
-        public ISubExpressionNode RightOperand;
+        public BinaryOperatorType OperatorType
+        {
+            get;
+            set;
+        }
+        public ISubExpressionNode LeftOperand
+        {
+            get;
+            set;
+        }
+        public ISubExpressionNode RightOperand
+        {
+            get;
+            set;
+        }
 
         public BinaryOperatorNode(BinaryOperatorType operatorType, ISubExpressionNode leftOperand, ISubExpressionNode rightOperand)
         {

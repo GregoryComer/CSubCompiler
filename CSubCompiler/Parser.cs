@@ -8,6 +8,14 @@ namespace CSubCompiler
 {
     public static class Parser
     {
+        public static bool CheckBounds(Token[] tokens, int i)
+        {
+            if (i >= tokens.Length)
+            {
+                throw new ParserException("Unexpected end of stream.", i, tokens[i]);
+            }
+            return true;
+        }
         public static Token Expect(Token[] tokens, ref int i, TokenType type)
         {
             if (tokens[i].Type != type) //Throw exception if token type does not match expected

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CSubCompiler.AST
 {
-    public class WhileNode : Node
+    public class WhileNode : StatementNode
     {
         public ExpressionNode Condition
         {
@@ -30,7 +30,7 @@ namespace CSubCompiler.AST
             return tokens[i].Type == TokenType.AlphaNum && tokens[i].Literal == "while";
         }
 
-        public static WhileNode ParseWhile(Token[] tokens, ref int i)
+        public static new WhileNode Parse(Token[] tokens, ref int i)
         {
             Parser.ExpectLiteral(tokens, ref i, TokenType.AlphaNum, "while");
             Parser.Expect(tokens, ref i, TokenType.LeftParen);

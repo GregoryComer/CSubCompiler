@@ -39,7 +39,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AST\AssignmentNode.cs" />
+    <Compile Include="AST\ExpressionStatementNode.cs" />
+    <Compile Include="AST\VariableDeclarationNode.cs" />
     <Compile Include="AST\BinaryOperatorNode.cs" />
     <Compile Include="AST\BlockNode.cs" />
     <Compile Include="AST\BreakNode.cs" />
