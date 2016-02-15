@@ -22,5 +22,18 @@ namespace CSubCompiler.AST
         {
             return OperatorType.ToString();
         }
+
+        public static bool IsUnaryPostOperator(Token[] tokens, int i)
+        {
+            return Operators.IsUnaryPostOperator(tokens, i);
+        }
+
+        public static UnaryPostOperatorNode ParseWithOperand(Token[] tokens, ref int i, ISubExpressionNode operand)
+        {
+            UnaryPostOperatorType opType = Operators.UnaryPostOperatorTokenTable[tokens[i].Type];
+            int opPrecedence = Operators.UnaryPostOperatorPrecedenceTable[opType];
+            i++; //Consume operator token
+            return new UnaryPostOperatorNode(opType, operand);
+        }
     }
 }

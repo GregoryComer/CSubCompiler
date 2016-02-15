@@ -8,6 +8,14 @@ namespace CSubCompiler
 {
     public static class Parser
     {
+        public static bool Check(Token[] tokens, int i, TokenType type)
+        {
+            return tokens[i].Type == type;
+        }
+        public static bool CheckLiteral(Token[] tokens, int i, TokenType type, string literal)
+        {
+            return (tokens[i].Type == type) && (tokens[i].Literal == literal);
+        }
         public static bool CheckBounds(Token[] tokens, int i)
         {
             if (i >= tokens.Length)
@@ -15,6 +23,10 @@ namespace CSubCompiler
                 throw new ParserException("Unexpected end of stream.", i, tokens[i]);
             }
             return true;
+        }
+        public static bool CheckBoundsNoThrow(Token[] tokens, int i)
+        {
+            return (i < tokens.Length);
         }
         public static Token Expect(Token[] tokens, ref int i, TokenType type)
         {

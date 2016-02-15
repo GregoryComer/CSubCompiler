@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CSubCompiler.Language;
 
 namespace CSubCompiler.AST
 {
@@ -17,6 +18,18 @@ namespace CSubCompiler.AST
             Struct = isStruct;
         }
 
+        public static bool IsTypeReferenceNode(Token[] tokens, int i)
+        {
+            if (Parser.CheckLiteral(tokens, i, TokenType.AlphaNum, "struct"))
+                i++;
+            if (!Parser.Check(tokens, i, TokenType.AlphaNum) || Language.Keywords.IsNonTypeKeyword(tokens[i].Literal))
+                return false;
+            i++;
+            if (Parser.Check(tokens, i, TokenType.LeftParen))
+                return false;
+            else
+                return true;
+        }
         public static TypeReferenceNode Parse(Token[] tokens, ref int i)
         {
             bool isStruct = false;

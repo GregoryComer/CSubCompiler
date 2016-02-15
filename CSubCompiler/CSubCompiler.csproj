@@ -40,6 +40,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AST\ExpressionStatementNode.cs" />
+    <Compile Include="AST\FunctionDeclarationNode.cs" />
+    <Compile Include="AST\FunctionDefinitionNode.cs" />
+    <Compile Include="AST\FunctionParameterNode.cs" />
+    <Compile Include="AST\StructDefinitionNode.cs" />
+    <Compile Include="AST\TopLevelNode.cs" />
+    <Compile Include="AST\TypedefNode.cs" />
     <Compile Include="AST\VariableDeclarationNode.cs" />
     <Compile Include="AST\BinaryOperatorNode.cs" />
     <Compile Include="AST\BlockNode.cs" />
