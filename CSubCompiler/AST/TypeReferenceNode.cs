@@ -9,13 +9,21 @@ namespace CSubCompiler.AST
 {
     public class TypeReferenceNode
     {
-        string Name;
-        bool Struct;
+        public string Name { get; set; }
+        public bool Struct { get; set; }
+        public int PointerDepth { get; set; }
 
         public TypeReferenceNode(string name, bool isStruct)
         {
             Name = name;
             Struct = isStruct;
+            PointerDepth = 0;
+        }
+        public TypeReferenceNode(string name, bool isStruct, int pointerDepth)
+        {
+            Name = name;
+            Struct = isStruct;
+            PointerDepth = pointerDepth;
         }
 
         public static bool IsTypeReferenceNode(Token[] tokens, int i)
@@ -25,6 +33,7 @@ namespace CSubCompiler.AST
             if (!Parser.Check(tokens, i, TokenType.AlphaNum) || Language.Keywords.IsNonTypeKeyword(tokens[i].Literal))
                 return false;
             i++;
+            for (; Parser.Check(tokens, i, TokenType.Star); i++) ; //Pass over pointer specifier, TODO: Make sure this doesn't accidently pass multiplication as a type reference in any cases
             if (Parser.Check(tokens, i, TokenType.LeftParen))
                 return false;
             else
@@ -39,7 +48,9 @@ namespace CSubCompiler.AST
                 i++; //Consume struct keyword
             }
             string name = Parser.Expect(tokens, ref i, TokenType.AlphaNum).Literal;
-            return new TypeReferenceNode(name, isStruct);
+            int pointerDepth = 0;
+            for (; Parser.Check(tokens, i, TokenType.Star); pointerDepth++, i++) ;
+            return new TypeReferenceNode(name, isStruct, pointerDepth);
         }
     }
 }

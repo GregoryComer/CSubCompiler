@@ -45,6 +45,10 @@ namespace CSubCompiler.AST
                             val = new BinaryOperatorNode(opType, val, right); //TEMPORARY, TODO: DETERMINE IF WORKS
                         }
                     }
+                    else
+                    {
+                        break;
+                    }
                 }
                 else if (UnaryPostOperatorNode.IsUnaryPostOperator(tokens, i))
                 {
