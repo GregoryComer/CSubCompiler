@@ -27,14 +27,14 @@ namespace CSubCompiler.IL
     /// </summary>
     public struct ILLoadRG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pushes the value at [A + B] onto the general stack
     /// </summary>
     public struct ILLoadROG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pushes the value at [A + B * Scale] onto the general stack
@@ -42,6 +42,7 @@ namespace CSubCompiler.IL
     public struct ILLoadROSG : IILGeneralInstruction
     {
         public AddressingScaleFactor Scale;
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops the top value off the stack into Destination
