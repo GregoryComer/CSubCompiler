@@ -9,7 +9,7 @@ namespace CSubCompiler.Language
     public static class Keywords
     {
         public static string[] KeywordTable = { "auto", "break", "case", "char", "const", "continue", "default", "do", "else", "enum", "extern", "float", "for", "goto", "if", "int", "long", "register", "return", "short", "signed", "sizeof", "static", "struct", "switch", "typedef", "union", "void", "volatile", "while" };
-        public static string[] TypeKeywordTable = { "char", "float", "int" };
+        public static string[] TypeKeywordTable = { "char", "float", "int", "void" };
 
         public static bool IsKeyword(string value)
         {

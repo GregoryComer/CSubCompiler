@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CSubCompiler.IL;
 
 namespace CSubCompiler.AST
 {
@@ -17,6 +18,11 @@ namespace CSubCompiler.AST
         public BlockNode(StatementNode[] statements)
         {
             Statements = statements;
+        }
+
+        public void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        {
+
         }
 
         public static BlockNode Parse(Token[] tokens, ref int i)

@@ -16,6 +16,10 @@ namespace CSubCompiler
         {
             return (tokens[i].Type == type) && (tokens[i].Literal == literal);
         }
+        public static bool CheckLiteral(Token[] tokens, int i, TokenType type, IEnumerable<string> literals)
+        {
+            return (tokens[i].Type == type) && literals.Contains(tokens[i].Literal);
+        }
         public static bool CheckBounds(Token[] tokens, int i)
         {
             if (i >= tokens.Length)
@@ -57,6 +61,11 @@ namespace CSubCompiler
                 i++;
                 return t;
             }
+        }
+
+        internal static Token Peek(Token[] tokens, int i)
+        {
+            return tokens[i];
         }
     }
 }

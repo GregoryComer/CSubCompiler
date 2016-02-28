@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CSubCompiler.IL;
 using CSubCompiler.Language;
 
 namespace CSubCompiler.AST
@@ -47,6 +48,16 @@ namespace CSubCompiler.AST
             {
                 return false; //It's a function call
             }
+        }
+
+        public void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ILTypeSpecifier GetResultType(ILGenerationContext context)
+        {
+            throw new NotImplementedException();
         }
     }
 }

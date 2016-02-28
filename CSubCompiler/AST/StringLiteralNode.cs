@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CSubCompiler.IL;
 
 namespace CSubCompiler.AST
 {
@@ -24,6 +25,16 @@ namespace CSubCompiler.AST
             string value = tokens[i].Literal;
             i++; //Consume token
             return new StringLiteralNode(value);
+        }
+
+        public override void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override ILTypeSpecifier GetResultType(ILGenerationContext context)
+        {
+            throw new NotImplementedException();
         }
     }
 }

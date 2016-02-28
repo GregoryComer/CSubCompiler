@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CSubCompiler.IL;
 using CSubCompiler.Language;
 
 namespace CSubCompiler.AST
@@ -14,6 +15,11 @@ namespace CSubCompiler.AST
         public ExpressionNode(ISubExpressionNode value)
         {
             Value = value;
+        }
+
+        public void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        {
+            Value.GenerateIL(context, output);
         }
 
         public static ExpressionNode Parse(Token[] tokens, ref int i)
@@ -111,6 +117,11 @@ namespace CSubCompiler.AST
             }
 
             return exp;
+        }
+
+        public ILTypeSpecifier GetResultType(ILGenerationContext context)
+        {
+            throw new NotImplementedException();
         }
     }
 }

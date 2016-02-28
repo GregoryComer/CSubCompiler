@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CSubCompiler.AST
 {
-    public class StructDefinitionNode : TopLevelNode
+    public class StructDefinitionNode : TopLevelNode, ITypeDefinitionNode
     {
         public string Name
         {
@@ -31,19 +31,27 @@ namespace CSubCompiler.AST
             Variables = variables;
         }
 
-        public static StructDefinitionNode Parse(Token[] tokens, ref int i)
+        public static new StructDefinitionNode Parse(Token[] tokens, ref int i)
         {
-            List<FunctionDefinitionNode> functions = new List<FunctionDefinitionNode>();
-            List<VariableDeclarationNode> variables = new List<VariableDeclarationNode>();
-
+            return Parse(tokens, ref i);
+        }
+        public static StructDefinitionNode Parse(Token[] tokens, ref int i, bool allowMethods)
+        {
             Parser.ExpectLiteral(tokens, ref i, TokenType.AlphaNum, "struct");
             string name = null;
             if (!Parser.Check(tokens, i, TokenType.LeftCurlyBrace))
                 name = Parser.Expect(tokens, ref i, TokenType.AlphaNum).Literal;
+            return ParseBodyOnly(tokens, ref i, name, allowMethods);
+        }
+        public static StructDefinitionNode ParseBodyOnly(Token[] tokens, ref int i, string name, bool allowMethods)
+        {
+            List<FunctionDefinitionNode> functions = new List<FunctionDefinitionNode>();
+            List<VariableDeclarationNode> variables = new List<VariableDeclarationNode>();
+
             Parser.Expect(tokens, ref i, TokenType.LeftCurlyBrace);
             while (!Parser.Check(tokens, i, TokenType.RightCurlyBrace))
             {
-                if (FunctionDefinitionNode.IsFunctionDefinition(tokens, i))
+                if (allowMethods && FunctionDefinitionNode.IsFunctionDefinition(tokens, i))
                 {
                     FunctionDefinitionNode func = FunctionDefinitionNode.Parse(tokens, ref i);
                     functions.Add(func);

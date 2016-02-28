@@ -43,6 +43,7 @@
     <Compile Include="AST\FunctionDeclarationNode.cs" />
     <Compile Include="AST\FunctionDefinitionNode.cs" />
     <Compile Include="AST\FunctionParameterNode.cs" />
+    <Compile Include="AST\ITypeDefinitionNode.cs" />
     <Compile Include="AST\StructDefinitionNode.cs" />
     <Compile Include="AST\TopLevelNode.cs" />
     <Compile Include="AST\TypedefNode.cs" />
@@ -70,9 +71,24 @@
     <Compile Include="AST\UnaryPreOperatorNode.cs" />
     <Compile Include="AST\VariableNode.cs" />
     <Compile Include="AST\WhileNode.cs" />
+    <Compile Include="IL\Arithmetic.cs" />
+    <Compile Include="IL\Bitwise.cs" />
+    <Compile Include="IL\Branching.cs" />
+    <Compile Include="IL\IILFloatInstruction.cs" />
+    <Compile Include="IL\IILGeneralInstruction.cs" />
+    <Compile Include="IL\IILInstruction.cs" />
+    <Compile Include="IL\ILDestination.cs" />
+    <Compile Include="IL\ILGenerationContext.cs" />
+    <Compile Include="IL\ILScope.cs" />
+    <Compile Include="IL\ILStruct.cs" />
+    <Compile Include="IL\ILTypeSpecifier.cs" />
+    <Compile Include="IL\ILVariable.cs" />
+    <Compile Include="IL\StackBasics.cs" />
+    <Compile Include="IL\Misc.cs" />
     <Compile Include="InternalCompilerException.cs" />
     <Compile Include="Language\Keywords.cs" />
     <Compile Include="Language\Operators.cs" />
+    <Compile Include="Language\Types.cs" />
     <Compile Include="Lexer.cs" />
     <Compile Include="LexerException.cs" />
     <Compile Include="Parser.cs" />
@@ -81,6 +97,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Token.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
