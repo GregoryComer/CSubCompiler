@@ -6,6 +6,17 @@ using System.Threading.Tasks;
 
 namespace CSubCompiler.IL
 {
+    public struct ILSignEx
+    {
+        GeneralOperandSize DestinationSize;
+        GeneralOperandSize SourceSize;
+    }
+    public struct ILZeroEx
+    {
+        GeneralOperandSize DestinationSize;
+        GeneralOperandSize SourceSize;
+    }
+
     public enum AddressingScaleFactor
     {
         One,
