@@ -10,7 +10,7 @@ namespace CSubCompiler.IL
     /// <summary>
     /// Pushes a constant value to the general stack
     /// </summary>
-    public struct ILLoadCG : IILGeneralInstruction
+    public struct ILLoadC : IILGeneralInstruction
     {
         public long Constant;
         public GeneralOperandSize Size;
@@ -18,28 +18,28 @@ namespace CSubCompiler.IL
     /// <summary>
     /// Pushes the value of a variable onto the general stack
     /// </summary>
-    public struct ILLoadAG : IILGeneralInstruction
+    public struct ILLoadA : IILGeneralInstruction
     {
         public ILVariable Variable;
     }
     /// <summary>
     /// Pushes the value at [A] onto the general stack
     /// </summary>
-    public struct ILLoadRG : IILGeneralInstruction
+    public struct ILLoadR : IILGeneralInstruction
     {
         public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pushes the value at [A + B] onto the general stack
     /// </summary>
-    public struct ILLoadROG : IILGeneralInstruction
+    public struct ILLoadRO : IILGeneralInstruction
     {
         public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pushes the value at [A + B * Scale] onto the general stack
     /// </summary>
-    public struct ILLoadROSG : IILGeneralInstruction
+    public struct ILLoadROS : IILGeneralInstruction
     {
         public AddressingScaleFactor Scale;
         public GeneralOperandSize OperandSize;
@@ -47,7 +47,7 @@ namespace CSubCompiler.IL
     /// <summary>
     /// Pops the top value off the stack into Destination
     /// </summary>
-    public struct ILStoreG : IILGeneralInstruction
+    public struct ILStore : IILGeneralInstruction
     {
         public ILDestination Destination;
         public GeneralOperandSize Size;
@@ -55,7 +55,7 @@ namespace CSubCompiler.IL
     /// <summary>
     /// Stores the value on the top of the general stack into Destination without popping
     /// </summary>
-    public struct ILPeekG : IILGeneralInstruction
+    public struct ILPeek : IILGeneralInstruction
     {
         public ILDestination Destination;
         public GeneralOperandSize Size;
@@ -63,7 +63,7 @@ namespace CSubCompiler.IL
     /// <summary>
     /// Swaps the value at general stack positions A and B
     /// </summary>
-    public struct ILExchangeG : IILGeneralInstruction
+    public struct ILExchange : IILGeneralInstruction
     {
         public int Index1;
         public int Index2;

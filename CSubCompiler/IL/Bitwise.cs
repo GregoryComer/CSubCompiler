@@ -11,35 +11,35 @@ namespace CSubCompiler.IL
         /// <summary>
         /// Pops top two values from the general stack, pushes A & B
         /// </summary>
-        public struct ILAndG : IILGeneralInstruction
+        public struct ILAnd : IILGeneralInstruction
         {
             public GeneralOperandSize OperandSize;
         }
         /// <summary>
         /// Pops top two values from the general stack, pushes A | B
         /// </summary>
-        public struct ILOrG : IILGeneralInstruction
+        public struct ILOr : IILGeneralInstruction
         {
             public GeneralOperandSize OperandSize;
         }
         /// <summary>
         /// Pops top two values from the general stack, pushes A ^ B
         /// </summary>
-        public struct ILXorG : IILGeneralInstruction
+        public struct ILXor : IILGeneralInstruction
         {
             public GeneralOperandSize OperandSize;
         }
         /// <summary>
         /// Pops top two values from the general stack, pushes A << B
         /// </summary>
-        public struct ILShlG : IILGeneralInstruction
+        public struct ILShl : IILGeneralInstruction
         {
             public GeneralOperandSize OperandSize;
         }
         /// <summary>
         /// Pops top two values from the general stack, pushes A >> B
         /// </summary>
-        public struct ILShrG : IILGeneralInstruction
+        public struct ILShr : IILGeneralInstruction
         {
             public GeneralOperandSize OperandSize;
         }
