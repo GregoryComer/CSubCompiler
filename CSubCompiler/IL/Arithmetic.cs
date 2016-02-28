@@ -12,98 +12,98 @@ namespace CSubCompiler.IL
     /// </summary>
     public struct ILAddG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops top two values from the general stack, pushes A - B
     /// </summary>
     public struct ILSubG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops top two values from the general stack, pushes B - A
     /// </summary>
     public struct ILRSubG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops top two values from the general stack, pushes A * B (unsigned)
     /// </summary>
     public struct ILMulG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops top two values from the general stack, pushes A * B (signed)
     /// </summary>
     public struct ILIMulG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops top two values from the general stack, pushes A / B (unsigned)
     /// </summary>
     public struct ILDivG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops top two values from the general stack, pushes B / A (unsigned)
     /// </summary>
     public struct ILRDivG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops top two values from the general stack, pushes A / B (signed)
     /// </summary>
     public struct ILIDivG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops top two values from the general stack, pushes B / A (signed)
     /// </summary>
     public struct ILRIDivG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops top value from the general stack, pushes -A
     /// </summary>
     public struct ILNegG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops top two values from the general stack, pushes A + B + Carry
     /// </summary>
     public struct ILAdcG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops top two values from the general stack, pushes A - B - Carry
     /// </summary>
     public struct ILSbbG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops top two value from the general stack, pushes A + 1
     /// </summary>
     public struct ILIncG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     /// <summary>
     /// Pops top value from the general stack, pushes A + 1
     /// </summary>
     public struct ILDecG : IILGeneralInstruction
     {
-
+        public GeneralOperandSize OperandSize;
     }
     #endregion
 
