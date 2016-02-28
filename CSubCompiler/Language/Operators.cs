@@ -13,6 +13,7 @@ namespace CSubCompiler.Language
         public static Dictionary<BinaryOperatorType, int> BinaryOperatorPrecedenceTable = new Dictionary<BinaryOperatorType, int>()
         {
             { BinaryOperatorType.Ampersand, 8 },
+            { BinaryOperatorType.AmpersandEqual, 14 },
             { BinaryOperatorType.Caret, 9 },
             { BinaryOperatorType.CaretEqual, 14 },
             { BinaryOperatorType.Divide, 3 },
@@ -61,6 +62,7 @@ namespace CSubCompiler.Language
         public static Dictionary<BinaryOperatorType, OperatorAssociativity> BinaryOperatorAssociativityTable = new Dictionary<BinaryOperatorType, OperatorAssociativity>()
         {
             { BinaryOperatorType.Ampersand, OperatorAssociativity.Left },
+            { BinaryOperatorType.AmpersandEqual, OperatorAssociativity.Right },
             { BinaryOperatorType.Caret, OperatorAssociativity.Left },
             { BinaryOperatorType.CaretEqual, OperatorAssociativity.Right },
             { BinaryOperatorType.Divide, OperatorAssociativity.Left },
@@ -109,6 +111,7 @@ namespace CSubCompiler.Language
         public static Dictionary<TokenType, BinaryOperatorType> BinaryOperatorTokenTable = new Dictionary<TokenType, BinaryOperatorType>()
         {
             { TokenType.Ampersand, BinaryOperatorType.Ampersand },
+            { TokenType.AmpersandEqual, BinaryOperatorType.AmpersandEqual },
             { TokenType.Caret, BinaryOperatorType.Caret },
             { TokenType.CaretEqual, BinaryOperatorType.CaretEqual },
             { TokenType.Divide, BinaryOperatorType.Divide },
@@ -179,6 +182,7 @@ namespace CSubCompiler.Language
     public enum BinaryOperatorType
     {
         Ampersand,
+        AmpersandEqual,
         Caret,
         CaretEqual,
         Divide,
