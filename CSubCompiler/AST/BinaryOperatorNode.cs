@@ -26,11 +26,17 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public BinaryOperatorNode(BinaryOperatorType operatorType, ISubExpressionNode leftOperand, ISubExpressionNode rightOperand)
+        public int TokenIndex;
+        public Token Token;
+
+        public BinaryOperatorNode(BinaryOperatorType operatorType, ISubExpressionNode leftOperand, ISubExpressionNode rightOperand, int tokenIndex, Token token)
         {
             OperatorType = operatorType;
             LeftOperand = leftOperand;
             RightOperand = rightOperand;
+
+            TokenIndex = tokenIndex;
+            Token = token;
         }
 
         public override string ToString()
@@ -48,9 +54,15 @@ namespace CSubCompiler.AST
         {
             ILTypeSpecifier leftOperandType = LeftOperand.GetResultType(context);
             ILTypeSpecifier rightOperandType = RightOperand.GetResultType(context);
+            if (leftOperandType.Category == ILTypeCategory.Struct || rightOperandType.Category == ILTypeCategory.Struct)
+                throw new ParserException(string.Format("Struct operand is not valid for operator {0}.", OperatorType.ToString()), TokenIndex, Token);
             var handlers = new Dictionary<IEnumerable<BinaryOperatorType>, Func<ILTypeSpecifier>>
             {
-                
+                { new BinaryOperatorType[] { BinaryOperatorType.Divide, BinaryOperatorType.DivideEqual, BinaryOperatorType.DoubleEqual, BinaryOperatorType.Equal, BinaryOperatorType.Greater, BinaryOperatorType.GreaterEqual, BinaryOperatorType.Less, BinaryOperatorType.LessEqual, BinaryOperatorType.Minus, BinaryOperatorType.MinusEqual, BinaryOperatorType.NotEqual, BinaryOperatorType.Plus, BinaryOperatorType.PlusEqual, BinaryOperatorType.Star, BinaryOperatorType.StarEqual }, () =>
+                    {
+                        BaseType leftType = (leftOperandType.Category == ILTypeCategory.Base) ? 
+                    }
+                }
             };
             return handlers.First(n => n.Key.Contains(OperatorType)).Value();
         }

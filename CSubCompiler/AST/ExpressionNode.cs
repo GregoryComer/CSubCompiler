@@ -44,11 +44,11 @@ namespace CSubCompiler.AST
                         ISubExpressionNode right = ParseQ(tokens, ref i, (opAssoc == OperatorAssociativity.Left) ? opPrecedence - 1 : opPrecedence);
                         if (opAssoc == OperatorAssociativity.Left)
                         {
-                            val = new BinaryOperatorNode(opType, val, right);
+                            val = new BinaryOperatorNode(opType, val, right, i, tokens[i]);
                         }
                         else //Right associative
                         {
-                            val = new BinaryOperatorNode(opType, val, right); //TEMPORARY, TODO: DETERMINE IF WORKS
+                            val = new BinaryOperatorNode(opType, val, right, i, tokens[i]); //TEMPORARY, TODO: DETERMINE IF WORKS
                         }
                     }
                     else
