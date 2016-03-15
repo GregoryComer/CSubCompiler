@@ -11,17 +11,12 @@ namespace CSubCompiler.AST
     public class UnaryPreOperatorNode : OperatorNode
     {
         public UnaryPreOperatorType OperatorType;
-        public ISubExpressionNode Operand;
+        public SubExpressionNode Operand;
 
-        public int TokenIndex;
-        public Token Token;
-
-        public UnaryPreOperatorNode(UnaryPreOperatorType operatorType, ISubExpressionNode operand, int tokenIndex, Token token)
+        public UnaryPreOperatorNode(UnaryPreOperatorType operatorType, SubExpressionNode operand, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             OperatorType = operatorType;
             Operand = operand;
-            TokenIndex = tokenIndex;
-            Token = token;
         }
 
         public override string ToString()
@@ -39,22 +34,21 @@ namespace CSubCompiler.AST
             UnaryPreOperatorType opType = Operators.UnaryPreOperatorTokenTable[tokens[i].Type];
             int opPrecedence = Operators.UnaryPreOperatorPrecedenceTable[opType];
             i++; //Consume operator token
-            ISubExpressionNode operand = ExpressionNode.ParseQ(tokens, ref i, opPrecedence);
-            return new UnaryPreOperatorNode(opType, operand, i - 1, tokens[i - 1]);
+            SubExpressionNode operand = ExpressionNode.ParseQ(tokens, ref i, opPrecedence);
+            return new UnaryPreOperatorNode(opType, operand, tokens[i - 1], i - 1);
         }
 
-        public override ILTypeSpecifier GetResultType(ILGenerationContext context)
+        public override ILType GetResultType(ILGenerationContext context)
         {
-            ILTypeSpecifier operandType = Operand.GetResultType(context);
-            var handlers = new Dictionary<IEnumerable<UnaryPreOperatorType>, Func<ILTypeSpecifier, ILTypeSpecifier>>
+            ILType operandType = Operand.GetResultType(context);
+            var handlers = new Dictionary<IEnumerable<UnaryPreOperatorType>, Func<ILType, ILType>>
             {
-                { new UnaryPreOperatorType[] { UnaryPreOperatorType.DoubleMinus, UnaryPreOperatorType.DoublePlus, UnaryPreOperatorType.Minus, UnaryPreOperatorType.Tilde }, opType =>
+                { new UnaryPreOperatorType[] { UnaryPreOperatorType.DoubleMinus, UnaryPreOperatorType.DoublePlus }, opType =>
                     {
                         switch (opType.Category)
                         {
                             case ILTypeCategory.Base:
-                                return opType;
-                            case ILTypeCategory.Enum:
+                            case ILTypeCategory.Pointer:
                                 return opType;
                             case ILTypeCategory.Struct:
                                 throw new ParserException(string.Format("Invalid operation \'{0}\' on type struct.", OperatorType.ToString()), TokenIndex, Token);
@@ -63,24 +57,38 @@ namespace CSubCompiler.AST
                         }
                     }
                 },
+                { new UnaryPreOperatorType[] { UnaryPreOperatorType.Minus, UnaryPreOperatorType.Tilde }, opType =>
+                    {
+                        switch (opType.Category)
+                        {
+                            case ILTypeCategory.Base:
+                                return opType;
+                            case ILTypeCategory.Pointer:
+                                throw new ParserException(string.Format("Invalid operation \'{0}\' on pointer type.", OperatorType.ToString()), TokenIndex, Token);
+                            case ILTypeCategory.Struct:
+                                throw new ParserException(string.Format("Invalid operation \'{0}\' on struct type.", OperatorType.ToString()), TokenIndex, Token);
+                            default:
+                                throw new InternalCompilerException("Unexpected operator type in type computation.");
+                        }
+                    }
+                },
                 { new UnaryPreOperatorType[] { UnaryPreOperatorType.Ampersand }, opType =>
                     {
-                        return new ILTypeSpecifier(opType.Name, opType.Category, opType.PointerDepth + 1);
+                        return new ILPointerType(opType);
                     }
                 },
                 { new UnaryPreOperatorType[] { UnaryPreOperatorType.Star }, opType =>
                     {
-                        if (opType.PointerDepth <= 0)
+                        if (opType.Category != ILTypeCategory.Pointer)
                             throw new ParserException("Cannot dereference non-pointer type.", TokenIndex, Token);
-                        return new ILTypeSpecifier(opType.Name, opType.Category, opType.PointerDepth - 1);
+                        return (opType as ILPointerType).Type;
                     }
                 },
                 { new UnaryPreOperatorType[] { UnaryPreOperatorType.Exclamation }, opType =>
                     {
                         if (opType.Category != ILTypeCategory.Base)
                             throw new ParserException("Unable to apply negation operator to non-integral type.", TokenIndex, Token);
-                        BaseType baseType = Types.GetBaseTypeByName(opType.Name);
-                        if (!Types.IsIntegralType(baseType))
+                        if (!Types.IsIntegralType((opType as ILBaseType).Type))
                             throw new ParserException("Unable to apply negation operator to non-integral type.", TokenIndex, Token);
                         return opType;
                     }
@@ -89,9 +97,168 @@ namespace CSubCompiler.AST
             return handlers.First(n => n.Key.Contains(OperatorType)).Value(operandType);
         }
 
-        public override void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        public override void GenerateIL(ILGenerationContext context)
         {
-            throw new NotImplementedException();
+            Operand.GenerateIL(context);
+            base.GenerateIL(context);
         }
+
+        protected override void GenerateILInternal(ILGenerationContext context)
+        {
+            ILType opType = Operand.GetResultType(context);
+            var handlers = new Dictionary<IEnumerable<UnaryPreOperatorType>, Action<ILGenerationContext, ILType>>
+            {
+                { new UnaryPreOperatorType[] { UnaryPreOperatorType.Ampersand }, (a, b) => { } },
+                { new UnaryPreOperatorType[] { UnaryPreOperatorType.DoubleMinus }, GenerateIL_DoubleMinus },
+                { new UnaryPreOperatorType[] { UnaryPreOperatorType.DoublePlus }, GenerateIL_DoublePlus },
+                { new UnaryPreOperatorType[] { UnaryPreOperatorType.Exclamation }, GenerateIL_Exclamation },
+                { new UnaryPreOperatorType[] { UnaryPreOperatorType.Minus }, GenerateIL_Minus },
+                { new UnaryPreOperatorType[] { UnaryPreOperatorType.Star }, (a, b) => { } },
+                { new UnaryPreOperatorType[] { UnaryPreOperatorType.Tilde }, GenerateIL_Tilde }
+            };
+            handlers.First(n => n.Key.Contains(OperatorType)).Value(context, opType);
+        }
+
+        #region IL Generation Methods
+        private void GenerateIL_DoublePlus(ILGenerationContext context, ILType opType)
+        {
+            switch (opType.Category)
+            {
+                case ILTypeCategory.Base:
+                    ILBaseType baseType = (ILBaseType)opType;
+                    if (Types.IsIntegralType(baseType.Type))
+                    {
+                        context.Output.Write(new ILInc { OperandSize = (GeneralOperandSize)Types.GetBaseTypeSize(baseType.Type) });
+                    }
+                    else if (Types.IsFloatType(baseType.Type))
+                    {
+                        context.Output.Write(new ILLoadCF { Constant = 1.0f });
+                        context.Output.Write(new ILAddF { });
+                    }
+                    else
+                    {
+                        throw new InternalCompilerException("Unexpected type.");
+                    }
+                    break;
+                case ILTypeCategory.Pointer:
+                    context.Output.Write(new ILInc { OperandSize = (GeneralOperandSize)Types.GetPointerSize() });
+                    break;
+                case ILTypeCategory.Struct:
+                    throw new ParserException(string.Format("Invalid operation {0} on type struct.", OperatorType.ToString()), TokenIndex, Token);
+                default:
+                    throw new InternalCompilerException("Unexpected operator type in IL generation.");
+            }
+        }
+        private void GenerateIL_DoubleMinus(ILGenerationContext context, ILType opType)
+        {
+            switch (opType.Category)
+            {
+                case ILTypeCategory.Base:
+                    ILBaseType baseType = (ILBaseType)opType;
+                    if (Types.IsIntegralType(baseType.Type))
+                    {
+                        context.Output.Write(new ILInc { OperandSize = (GeneralOperandSize)Types.GetBaseTypeSize(baseType.Type) });
+                    }
+                    else if (Types.IsFloatType(baseType.Type))
+                    {
+                        context.Output.Write(new ILLoadCF { Constant = 1.0f });
+                        context.Output.Write(new ILAddF { });
+                    }
+                    else
+                    {
+                        throw new InternalCompilerException("Unexpected type.");
+                    }
+                    break;
+                case ILTypeCategory.Pointer:
+                    context.Output.Write(new ILInc { OperandSize = (GeneralOperandSize)Types.GetPointerSize() });
+                    break;
+                case ILTypeCategory.Struct:
+                    throw new ParserException(string.Format("Invalid operation {0} on type struct.", OperatorType.ToString()), TokenIndex, Token);
+                default:
+                    throw new InternalCompilerException("Unexpected operator type in IL generation.");
+            }
+        }
+        private void GenerateIL_Exclamation(ILGenerationContext context, ILType opType)
+        {
+            switch (opType.Category)
+            {
+                case ILTypeCategory.Base:
+                    ILBaseType baseType = (ILBaseType)opType;
+                    if (Types.IsIntegralType(baseType.Type))
+                    {
+                        context.Output.Write(new ILNBool { OperandSize = (GeneralOperandSize)Types.GetBaseTypeSize(baseType.Type) });
+                    }
+                    else if (Types.IsFloatType(baseType.Type))
+                    {
+                        throw new ParserException(string.Format("Invalid operation {0} on floating point type.", OperatorType.ToString()), TokenIndex, Token);
+                    }
+                    else
+                    {
+                        throw new InternalCompilerException("Unexpected type.");
+                    }
+                    break;
+                case ILTypeCategory.Pointer:
+                    throw new ParserException(string.Format("Invalid operation {0} on pointer type.", OperatorType.ToString()), TokenIndex, Token);
+                case ILTypeCategory.Struct:
+                    throw new ParserException(string.Format("Invalid operation {0} on struct type.", OperatorType.ToString()), TokenIndex, Token);
+                default:
+                    throw new InternalCompilerException("Unexpected operator type in IL generation.");
+            }
+        }
+        private void GenerateIL_Minus(ILGenerationContext context, ILType opType)
+        {
+            switch (opType.Category)
+            {
+                case ILTypeCategory.Base:
+                    ILBaseType baseType = (ILBaseType)opType;
+                    if (Types.IsIntegralType(baseType.Type))
+                    {
+                        context.Output.Write(new ILNeg { OperandSize = (GeneralOperandSize)Types.GetBaseTypeSize(baseType.Type) });
+                    }
+                    else if (Types.IsFloatType(baseType.Type))
+                    {
+                        context.Output.Write(new ILNegF { });
+                    }
+                    else
+                    {
+                        throw new InternalCompilerException("Unexpected type.");
+                    }
+                    break;
+                case ILTypeCategory.Pointer:
+                    throw new ParserException(string.Format("Invalid operation {0} on pointer type.", OperatorType.ToString()), TokenIndex, Token);
+                case ILTypeCategory.Struct:
+                    throw new ParserException(string.Format("Invalid operation {0} on type struct.", OperatorType.ToString()), TokenIndex, Token);
+                default:
+                    throw new InternalCompilerException("Unexpected operator type in IL generation.");
+            }
+        }
+        private void GenerateIL_Tilde(ILGenerationContext context, ILType opType)
+        {
+            switch (opType.Category)
+            {
+                case ILTypeCategory.Base:
+                    ILBaseType baseType = (ILBaseType)opType;
+                    if (Types.IsIntegralType(baseType.Type))
+                    {
+                        context.Output.Write(new ILNot { OperandSize = (GeneralOperandSize)Types.GetBaseTypeSize(baseType.Type) });
+                    }
+                    else if (Types.IsFloatType(baseType.Type))
+                    {
+                        throw new ParserException(string.Format("Invalid operation {0} on floating point type.", OperatorType.ToString()), TokenIndex, Token);
+                    }
+                    else
+                    {
+                        throw new InternalCompilerException("Unexpected type.");
+                    }
+                    break;
+                case ILTypeCategory.Pointer:
+                    throw new ParserException(string.Format("Invalid operation {0} on pointer type.", OperatorType.ToString()), TokenIndex, Token);
+                case ILTypeCategory.Struct:
+                    throw new ParserException(string.Format("Invalid operation {0} on type struct.", OperatorType.ToString()), TokenIndex, Token);
+                default:
+                    throw new InternalCompilerException("Unexpected operator type in IL generation.");
+            }
+        }
+        #endregion
     }
 }

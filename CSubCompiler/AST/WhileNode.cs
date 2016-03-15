@@ -19,7 +19,7 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public WhileNode(ExpressionNode condition, BlockNode body)
+        public WhileNode(ExpressionNode condition, BlockNode body, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Condition = condition;
             Body = body;
@@ -32,12 +32,15 @@ namespace CSubCompiler.AST
 
         public static new WhileNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             Parser.ExpectLiteral(tokens, ref i, TokenType.AlphaNum, "while");
             Parser.Expect(tokens, ref i, TokenType.LeftParen);
             ExpressionNode condition = ExpressionNode.Parse(tokens, ref i);
             Parser.Expect(tokens, ref i, TokenType.RightParen);
             BlockNode whileBlock = BlockNode.Parse(tokens, ref i);
-            return new WhileNode(condition, whileBlock);
+            return new WhileNode(condition, whileBlock, startToken, startIndex);
         }
     }
 }

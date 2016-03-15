@@ -16,48 +16,46 @@ namespace CSubCompiler.IL
         public GeneralOperandSize Size;
     }
     /// <summary>
-    /// Pushes the value of a variable onto the general stack
-    /// </summary>
-    public struct ILLoadA : IILGeneralInstruction
-    {
-        public ILVariable Variable;
-    }
-    /// <summary>
-    /// Pushes the value at [A] onto the general stack
+    /// Pushes the value at [Address] onto the general stack
     /// </summary>
     public struct ILLoadR : IILGeneralInstruction
     {
-        public GeneralOperandSize OperandSize;
+        public ulong Address;
+        public GeneralOperandSize Size;
     }
     /// <summary>
-    /// Pushes the value at [A + B] onto the general stack
+    /// Pops the top value off of the general stack
+    /// Pushes the value at [Top + Address] onto the general stack
     /// </summary>
     public struct ILLoadRO : IILGeneralInstruction
     {
+        public ulong Address;
         public GeneralOperandSize OperandSize;
     }
     /// <summary>
-    /// Pushes the value at [A + B * Scale] onto the general stack
+    /// Pops the top value off of the general stack
+    /// Pushes the value at [Address + Top * Scale] onto the general stack
     /// </summary>
     public struct ILLoadROS : IILGeneralInstruction
     {
+        public ulong Address;
         public AddressingScaleFactor Scale;
         public GeneralOperandSize OperandSize;
     }
     /// <summary>
-    /// Pops the top value off the stack into Destination
+    /// Pops the top value off the stack into [Address]
     /// </summary>
     public struct ILStore : IILGeneralInstruction
     {
-        public ILDestination Destination;
+        public ulong Address;
         public GeneralOperandSize Size;
     }
     /// <summary>
-    /// Stores the value on the top of the general stack into Destination without popping
+    /// Stores the value on the top of the general stack into [Address] without popping
     /// </summary>
     public struct ILPeek : IILGeneralInstruction
     {
-        public ILDestination Destination;
+        public ulong Address;
         public GeneralOperandSize Size;
     }
     /// <summary>
@@ -77,50 +75,48 @@ namespace CSubCompiler.IL
     public struct ILLoadCF : IILFloatInstruction
     {
         public double Constant;
-        public FloatOperandSize Size;
     }
     /// <summary>
-    /// Pushes the value of a variable onto the floating point stack
-    /// </summary>
-    public struct ILLoadAF : IILFloatInstruction
-    {
-        public ILVariable Variable;
-    }
-    /// <summary>
-    /// Pushes the value at [A] onto the floating point stack
+    /// Pushes the value at [Address] onto the floating point stack
     /// </summary>
     public struct ILLoadRF : IILFloatInstruction
     {
-
+        public ulong Address;
+        public FloatOperandSize OperandSize;
     }
     /// <summary>
-    /// Pushes the value at [A + B] onto the floating point stack
+    /// Pops the top vlaue off of the general stack
+    /// Pushes the value at [Address + Top] onto the floating point stack
     /// </summary>
     public struct ILLoadROF : IILFloatInstruction
     {
-
+        public ulong Address;
+        public FloatOperandSize OperandSize;
     }
     /// <summary>
-    /// Pushes the value at [A + B * Scale] onto the floating point stack
+    /// Pops the top value off of the stack
+    /// Pushes the value at [Adress + Top * Scale] onto the floating point stack
     /// </summary>
     public struct ILLoadROSF : IILFloatInstruction
     {
+        public ulong Address;
         public AddressingScaleFactor Scale;
     }
     /// <summary>
-    /// Pops the top value off the floating point stack into Destination
+    /// Pops the top value off the floating point stack into [Address]
     /// </summary>
     public struct ILStoreF : IILFloatInstruction
     {
-        public ILDestination Destination;
+        public ulong Address;
         public FloatOperandSize Size;
     }
     /// <summary>
-    /// Stores the value on the top of the floating point stack into Destination without popping
+    /// Stores the value on the top of the floating point stack into [Address] without popping
     /// </summary>
     public struct ILPeekF : IILFloatInstruction
     {
-
+        public ulong Address;
+        public FloatOperandSize Size;
     }
     /// <summary>
     /// Swaps the value at floating point stack positions A and B

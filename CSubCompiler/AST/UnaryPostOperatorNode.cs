@@ -11,17 +11,15 @@ namespace CSubCompiler.AST
     public class UnaryPostOperatorNode : OperatorNode
     {
         public UnaryPostOperatorType OperatorType;
-        public ISubExpressionNode Operand;
+        public SubExpressionNode Operand;
 
         public int TokenIndex;
         public Token Token;
 
-        public UnaryPostOperatorNode(UnaryPostOperatorType operatorType, ISubExpressionNode operand, int tokenIndex, Token token)
+        public UnaryPostOperatorNode(UnaryPostOperatorType operatorType, SubExpressionNode operand, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             OperatorType = operatorType;
             Operand = operand;
-            TokenIndex = tokenIndex;
-            Token = token;
         }
 
         public override string ToString()
@@ -34,31 +32,103 @@ namespace CSubCompiler.AST
             return Operators.IsUnaryPostOperator(tokens, i);
         }
 
-        public static UnaryPostOperatorNode ParseWithOperand(Token[] tokens, ref int i, ISubExpressionNode operand)
+        public static UnaryPostOperatorNode ParseWithOperand(Token[] tokens, ref int i, SubExpressionNode operand)
         {
             UnaryPostOperatorType opType = Operators.UnaryPostOperatorTokenTable[tokens[i].Type];
             int opPrecedence = Operators.UnaryPostOperatorPrecedenceTable[opType];
             i++; //Consume operator token
-            return new UnaryPostOperatorNode(opType, operand, i - 1, tokens[i - 1]);
+            return new UnaryPostOperatorNode(opType, operand, tokens[i - 1], i - 1);
         }
 
-        public override void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        public override void GenerateIL(ILGenerationContext context)
         {
-            throw new NotImplementedException();
+            Operand.GenerateIL(context);
+            base.GenerateIL(context);
         }
 
-        public override ILTypeSpecifier GetResultType(ILGenerationContext context)
+        protected override void GenerateILInternal(ILGenerationContext context)
         {
-            ILTypeSpecifier operandType = Operand.GetResultType(context);
-            var handlers = new Dictionary<IEnumerable<UnaryPostOperatorType>, Func<ILTypeSpecifier, ILTypeSpecifier>>
+            ILType opType = Operand.GetResultType(context);
+            var handlers = new Dictionary<IEnumerable<UnaryPostOperatorType>, Action<ILGenerationContext, ILType>>
+            {
+                { new UnaryPostOperatorType[] { UnaryPostOperatorType.DoubleMinus }, GenerateIL_DoubleMinus },
+                { new UnaryPostOperatorType[] { UnaryPostOperatorType.DoublePlus }, GenerateIL_DoublePlus }
+            };
+            handlers.First(n => n.Key.Contains(OperatorType)).Value(context, opType);
+        }
+
+        #region IL Generation Methods
+        private void GenerateIL_DoublePlus(ILGenerationContext context, ILType opType)
+        {
+            switch (opType.Category)
+            {
+                case ILTypeCategory.Base:
+                    ILBaseType baseType = (ILBaseType)opType;
+                    if (Types.IsIntegralType(baseType.Type))
+                    {
+                        context.Output.Write(new ILInc { OperandSize = (GeneralOperandSize)Types.GetBaseTypeSize(baseType.Type) });
+                    }
+                    else if (Types.IsFloatType(baseType.Type))
+                    {
+                        context.Output.Write(new ILLoadCF { Constant = 1.0f });
+                        context.Output.Write(new ILAddF { });
+                    }
+                    else
+                    {
+                        throw new InternalCompilerException("Unexpected type.");
+                    }
+                    break;
+                case ILTypeCategory.Pointer:
+                    context.Output.Write(new ILInc { OperandSize = (GeneralOperandSize)Types.GetPointerSize() });
+                    break;
+                case ILTypeCategory.Struct:
+                    throw new ParserException(string.Format("Invalid operation {0} on type struct.", OperatorType.ToString()), TokenIndex, Token);
+                default:
+                    throw new InternalCompilerException("Unexpected operator type in IL generation.");
+            }
+        }
+        private void GenerateIL_DoubleMinus(ILGenerationContext context, ILType opType)
+        {
+            switch (opType.Category)
+            {
+                case ILTypeCategory.Base:
+                    ILBaseType baseType = (ILBaseType)opType;
+                    if (Types.IsIntegralType(baseType.Type))
+                    {
+                        context.Output.Write(new ILInc { OperandSize = (GeneralOperandSize)Types.GetBaseTypeSize(baseType.Type) });
+                    }
+                    else if (Types.IsFloatType(baseType.Type))
+                    {
+                        context.Output.Write(new ILLoadCF { Constant = 1.0f });
+                        context.Output.Write(new ILAddF { });
+                    }
+                    else
+                    {
+                        throw new InternalCompilerException("Unexpected type.");
+                    }
+                    break;
+                case ILTypeCategory.Pointer:
+                    context.Output.Write(new ILInc { OperandSize = (GeneralOperandSize)Types.GetPointerSize() });
+                    break;
+                case ILTypeCategory.Struct:
+                    throw new ParserException(string.Format("Invalid operation {0} on type struct.", OperatorType.ToString()), TokenIndex, Token);
+                default:
+                    throw new InternalCompilerException("Unexpected operator type in IL generation.");
+            }
+        } 
+        #endregion
+
+        public override ILType GetResultType(ILGenerationContext context)
+        {
+            ILType operandType = Operand.GetResultType(context);
+            var handlers = new Dictionary<IEnumerable<UnaryPostOperatorType>, Func<ILType, ILType>>
             {
                 { new UnaryPostOperatorType[] { UnaryPostOperatorType.DoubleMinus, UnaryPostOperatorType.DoublePlus }, opType =>
                     {
                         switch (opType.Category)
                         {
                             case ILTypeCategory.Base:
-                                return opType;
-                            case ILTypeCategory.Enum:
+                            case ILTypeCategory.Pointer:
                                 return opType;
                             case ILTypeCategory.Struct:
                                 throw new ParserException(string.Format("Invalid operation {0} on type struct.", OperatorType.ToString()), TokenIndex, Token);

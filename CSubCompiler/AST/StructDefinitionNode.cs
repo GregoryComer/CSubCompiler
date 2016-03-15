@@ -24,7 +24,7 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public StructDefinitionNode(string name, FunctionDefinitionNode[] functions, VariableDeclarationNode[] variables)
+        public StructDefinitionNode(string name, FunctionDefinitionNode[] functions, VariableDeclarationNode[] variables, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Name = name;
             Functions = functions;
@@ -45,6 +45,9 @@ namespace CSubCompiler.AST
         }
         public static StructDefinitionNode ParseBodyOnly(Token[] tokens, ref int i, string name, bool allowMethods)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             List<FunctionDefinitionNode> functions = new List<FunctionDefinitionNode>();
             List<VariableDeclarationNode> variables = new List<VariableDeclarationNode>();
 
@@ -64,7 +67,7 @@ namespace CSubCompiler.AST
                 }
             }
             Parser.Expect(tokens, ref i, TokenType.RightCurlyBrace);
-            return new StructDefinitionNode(name, functions.ToArray(), variables.ToArray());
+            return new StructDefinitionNode(name, functions.ToArray(), variables.ToArray(), startToken, startIndex);
         }
 
         public static bool IsStructDefinition(Token[] tokens, int i)

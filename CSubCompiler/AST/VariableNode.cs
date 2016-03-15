@@ -8,7 +8,7 @@ using CSubCompiler.Language;
 
 namespace CSubCompiler.AST
 {
-    public class VariableNode : ISubExpressionNode
+    public class VariableNode : SubExpressionNode
     {
         public IdentifierNode Identifier
         {
@@ -16,7 +16,7 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public VariableNode(IdentifierNode identifier)
+        public VariableNode(IdentifierNode identifier, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Identifier = identifier;
         }
@@ -28,8 +28,11 @@ namespace CSubCompiler.AST
 
         public static VariableNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             IdentifierNode identifier = IdentifierNode.Parse(tokens, ref i);
-            return new VariableNode(identifier);
+            return new VariableNode(identifier, startToken, startIndex);
         }
 
         public static bool IsVariable(Token[] tokens, int i)
@@ -50,12 +53,12 @@ namespace CSubCompiler.AST
             }
         }
 
-        public void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        public void GenerateILInternal(ILGenerationContext context)
         {
             throw new NotImplementedException();
         }
 
-        public ILTypeSpecifier GetResultType(ILGenerationContext context)
+        public override ILType GetResultType(ILGenerationContext context)
         {
             throw new NotImplementedException();
         }

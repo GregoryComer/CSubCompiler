@@ -20,7 +20,7 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public TypedefNode(TypeReferenceNode type, string name)
+        public TypedefNode(TypeReferenceNode type, string name, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Type = type;
             Name = name;
@@ -32,6 +32,9 @@ namespace CSubCompiler.AST
         }
         public static new TypedefNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             Parser.ExpectLiteral(tokens, ref i, TokenType.AlphaNum, "typedef");
             TypeReferenceNode typeReference;
             typeReference = TypeReferenceNode.Parse(tokens, ref i);
@@ -41,7 +44,7 @@ namespace CSubCompiler.AST
                 throw new ParserException("Invalid typedef name.", i, tokens[i]);
             }
             Parser.Expect(tokens, ref i, TokenType.Semicolon);
-            return new TypedefNode(typeReference, name);
+            return new TypedefNode(typeReference, name, startToken, startIndex);
         }
     }
 }

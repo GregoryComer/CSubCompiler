@@ -15,26 +15,29 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public StringLiteralNode(string value)
+        public StringLiteralNode(string value, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Value = value;
         }
 
         public static StringLiteralNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             string value = tokens[i].Literal;
             i++; //Consume token
-            return new StringLiteralNode(value);
+            return new StringLiteralNode(value, startToken, startIndex);
         }
 
-        public override void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        protected override void GenerateILInternal(ILGenerationContext context)
         {
             throw new NotImplementedException();
         }
 
-        public override ILTypeSpecifier GetResultType(ILGenerationContext context)
+        public override ILType GetResultType(ILGenerationContext context)
         {
-            throw new NotImplementedException();
+            return new ILPointerType(new ILBaseType(Language.BaseType.Char));
         }
     }
 }

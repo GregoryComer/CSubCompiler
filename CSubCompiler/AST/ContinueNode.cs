@@ -8,7 +8,7 @@ namespace CSubCompiler.AST
 {
     public class ContinueNode : StatementNode
     {
-        public ContinueNode()
+        public ContinueNode(Token token, int tokenIndex) : base(token, tokenIndex)
         {
 
         }
@@ -20,8 +20,11 @@ namespace CSubCompiler.AST
 
         public static new ContinueNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             Parser.ExpectLiteral(tokens, ref i, TokenType.AlphaNum, "continue");
-            return new ContinueNode();
+            return new ContinueNode(startToken, startIndex);
         }
     }
 }

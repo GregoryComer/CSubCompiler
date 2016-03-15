@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CSubCompiler.IL;
+using CSubCompiler.Language;
 
 namespace CSubCompiler.AST
 {
-    public class FloatLiteralNode : LiteralNode
+    public class FloatLiteralNode : LiteralNode //Todo: Handle doubles
     {
         public float Value
         {
@@ -15,7 +16,7 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public FloatLiteralNode(float value)
+        public FloatLiteralNode(float value, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Value = value;
         }
@@ -27,23 +28,26 @@ namespace CSubCompiler.AST
 
         public static FloatLiteralNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             float value;
             if (!float.TryParse(tokens[i].Literal, out value))
             {
                 throw new ParserException("Invalid float literal.", i, tokens[i]); //Should not occur. Any invalid float literals should be caught by lexer. This is a fallback.
             }
             i++; //Consume token
-            return new FloatLiteralNode(value);
+            return new FloatLiteralNode(value, startToken, startIndex);
         }
 
-        public override void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        protected override void GenerateILInternal(ILGenerationContext context)
         {
-            throw new NotImplementedException();
+            context.Output.Write(new ILLoadCF { Constant = Value });
         }
 
-        public override ILTypeSpecifier GetResultType(ILGenerationContext context)
+        public override ILType GetResultType(ILGenerationContext context)
         {
-            throw new NotImplementedException();
+            return new ILBaseType(Language.BaseType.Float);
         }
     }
 }

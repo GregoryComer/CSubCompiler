@@ -24,12 +24,12 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public IfNode(ExpressionNode condition, BlockNode ifBlock)
+        public IfNode(ExpressionNode condition, BlockNode ifBlock, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Condition = condition;
             IfBlock = ifBlock;
         }
-        public IfNode(ExpressionNode condition, BlockNode ifBlock, BlockNode elseBlock)
+        public IfNode(ExpressionNode condition, BlockNode ifBlock, BlockNode elseBlock, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Condition = condition;
             IfBlock = ifBlock;
@@ -43,6 +43,9 @@ namespace CSubCompiler.AST
 
         public static new IfNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             Parser.ExpectLiteral(tokens, ref i, TokenType.AlphaNum, "if");
             Parser.Expect(tokens, ref i, TokenType.LeftParen);
             ExpressionNode condition = ExpressionNode.Parse(tokens, ref i);
@@ -51,11 +54,11 @@ namespace CSubCompiler.AST
             if (tokens[i].Type == TokenType.AlphaNum && tokens[i].Literal == "else") //Has else block
             {
                 BlockNode elseBlock = BlockNode.Parse(tokens, ref i);
-                return new IfNode(condition, ifBlock, elseBlock);
+                return new IfNode(condition, ifBlock, elseBlock, startToken, startIndex);
             }
             else //No else block
             {
-                return new IfNode(condition, ifBlock);
+                return new IfNode(condition, ifBlock, startToken, startIndex);
             }
         }
     }

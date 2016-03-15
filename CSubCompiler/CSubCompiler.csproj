@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AST\CastNode.cs" />
     <Compile Include="AST\ExpressionStatementNode.cs" />
     <Compile Include="AST\FunctionDeclarationNode.cs" />
     <Compile Include="AST\FunctionDefinitionNode.cs" />
@@ -60,7 +61,7 @@
     <Compile Include="AST\IdentifierNode.cs" />
     <Compile Include="AST\IfNode.cs" />
     <Compile Include="AST\IntLiteralNode.cs" />
-    <Compile Include="AST\ISubExpressionNode.cs" />
+    <Compile Include="AST\SubExpressionNode.cs" />
     <Compile Include="AST\LiteralNode.cs" />
     <Compile Include="AST\Node.cs" />
     <Compile Include="AST\OperatorNode.cs" />
@@ -77,12 +78,12 @@
     <Compile Include="IL\IILFloatInstruction.cs" />
     <Compile Include="IL\IILGeneralInstruction.cs" />
     <Compile Include="IL\IILInstruction.cs" />
-    <Compile Include="IL\ILDestination.cs" />
     <Compile Include="IL\ILGenerationContext.cs" />
+    <Compile Include="IL\ILOutputStream.cs" />
     <Compile Include="IL\ILScope.cs" />
-    <Compile Include="IL\ILStruct.cs" />
-    <Compile Include="IL\ILTypeSpecifier.cs" />
+    <Compile Include="IL\ILType.cs" />
     <Compile Include="IL\ILVariable.cs" />
+    <Compile Include="IL\ScopeStack.cs" />
     <Compile Include="IL\StackBasics.cs" />
     <Compile Include="IL\Misc.cs" />
     <Compile Include="InternalCompilerException.cs" />

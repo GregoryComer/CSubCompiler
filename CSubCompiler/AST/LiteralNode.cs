@@ -7,9 +7,8 @@ using CSubCompiler.IL;
 
 namespace CSubCompiler.AST
 {
-    public abstract class LiteralNode : ISubExpressionNode
+    public abstract class LiteralNode : SubExpressionNode
     {
-        public abstract void GenerateIL(ILGenerationContext context, List<IILInstruction> output);
-        public abstract ILTypeSpecifier GetResultType(ILGenerationContext context);
+        public LiteralNode(Token token, int tokenIndex) : base(token, tokenIndex) { }
     }
 }

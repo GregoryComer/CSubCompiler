@@ -15,18 +15,21 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public BlockNode(StatementNode[] statements)
+        public BlockNode(StatementNode[] statements, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Statements = statements;
         }
 
-        public void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        public void GenerateILInternal(ILGenerationContext context)
         {
 
         }
 
         public static BlockNode Parse(Token[] tokens, ref int i)
         {
+            Token token = tokens[i];
+            int tokenIndex = i;
+
             List<StatementNode> statements = new List<StatementNode>();
             if (Parser.CheckBounds(tokens, i) && tokens[i].Type == TokenType.LeftCurlyBrace)
             {
@@ -43,7 +46,7 @@ namespace CSubCompiler.AST
                 StatementNode statement = StatementNode.Parse(tokens, ref i);
                 statements.Add(statement);
             }
-            return new BlockNode(statements.ToArray());
+            return new BlockNode(statements.ToArray(), token, tokenIndex);
         }
     }
 }

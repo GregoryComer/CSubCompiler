@@ -29,7 +29,7 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public FunctionDefinitionNode(TypeReferenceNode returnType, string name, FunctionParameterNode[] parameters, BlockNode body)
+        public FunctionDefinitionNode(TypeReferenceNode returnType, string name, FunctionParameterNode[] parameters, BlockNode body, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Body = body;
             Name = name;
@@ -39,6 +39,9 @@ namespace CSubCompiler.AST
 
         public static FunctionDefinitionNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             TypeReferenceNode returnType = TypeReferenceNode.Parse(tokens, ref i);
             string name = Parser.Expect(tokens, ref i, TokenType.AlphaNum).Literal;
             Parser.Expect(tokens, ref i, TokenType.LeftParen);
@@ -49,11 +52,14 @@ namespace CSubCompiler.AST
             }
             Parser.Expect(tokens, ref i, TokenType.RightParen);
             BlockNode body = BlockNode.Parse(tokens, ref i);
-            return new FunctionDefinitionNode(returnType, name, parameters.ToArray(), body);
+            return new FunctionDefinitionNode(returnType, name, parameters.ToArray(), body, startToken, startIndex);
         }
 
         public static TopLevelNode ParseFunctionDefinitionOrDeclaration(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             TypeReferenceNode returnType = TypeReferenceNode.Parse(tokens, ref i);
             string name = Parser.Expect(tokens, ref i, TokenType.AlphaNum).Literal;
             Parser.Expect(tokens, ref i, TokenType.LeftParen);
@@ -71,14 +77,14 @@ namespace CSubCompiler.AST
             if (Parser.Check(tokens, i, TokenType.Semicolon)) //Function Declaration
             {
                 i++; //Consume Semicolon
-                return new FunctionDeclarationNode(returnType, name, parameters.ToArray());
+                return new FunctionDeclarationNode(returnType, name, parameters.ToArray(), startToken, startIndex);
             }
             else //Function Definition
             {
                 if (parameters.Any(n => (n.Name == null || n.Name == "")))
                     throw new ParserException("Missing parameter name.", i, tokens[i]); //Todo: Better error reporting
                 BlockNode body = BlockNode.Parse(tokens, ref i);
-                return new FunctionDefinitionNode(returnType, name, parameters.ToArray(), body);
+                return new FunctionDefinitionNode(returnType, name, parameters.ToArray(), body, startToken, startIndex);
             }
         }
 

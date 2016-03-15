@@ -8,7 +8,7 @@ namespace CSubCompiler.AST
 {
     public class BreakNode : StatementNode
     {
-        public BreakNode()
+        public BreakNode(Token token, int tokenIndex) : base(token, tokenIndex)
         {
 
         }
@@ -20,8 +20,11 @@ namespace CSubCompiler.AST
 
         public static new BreakNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             Parser.ExpectLiteral(tokens, ref i, TokenType.AlphaNum, "break");
-            return new BreakNode();
+            return new BreakNode(startToken, startIndex);
         }
     }
 }

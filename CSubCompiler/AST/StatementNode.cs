@@ -8,6 +8,11 @@ namespace CSubCompiler.AST
 {
     public class StatementNode : Node
     {
+        public StatementNode(Token token, int tokenIndex) : base(token, tokenIndex)
+        {
+
+        }
+
         public static StatementNode Parse(Token[] tokens, ref int i)
         {
             if (IfNode.IsIf(tokens, i))

@@ -15,12 +15,12 @@ namespace CSubCompiler.AST
             get;
             set;
         }
-        public ISubExpressionNode LeftOperand
+        public SubExpressionNode LeftOperand
         {
             get;
             set;
         }
-        public ISubExpressionNode RightOperand
+        public SubExpressionNode RightOperand
         {
             get;
             set;
@@ -29,14 +29,11 @@ namespace CSubCompiler.AST
         public int TokenIndex;
         public Token Token;
 
-        public BinaryOperatorNode(BinaryOperatorType operatorType, ISubExpressionNode leftOperand, ISubExpressionNode rightOperand, int tokenIndex, Token token)
+        public BinaryOperatorNode(BinaryOperatorType operatorType, SubExpressionNode leftOperand, SubExpressionNode rightOperand, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             OperatorType = operatorType;
             LeftOperand = leftOperand;
             RightOperand = rightOperand;
-
-            TokenIndex = tokenIndex;
-            Token = token;
         }
 
         public override string ToString()
@@ -50,27 +47,96 @@ namespace CSubCompiler.AST
         }
 
         #region IL Generation
-        public override ILTypeSpecifier GetResultType(ILGenerationContext context)
+        public override ILType GetResultType(ILGenerationContext context)
         {
-            ILTypeSpecifier leftOperandType = LeftOperand.GetResultType(context);
-            ILTypeSpecifier rightOperandType = RightOperand.GetResultType(context);
-            if (leftOperandType.Category == ILTypeCategory.Struct || rightOperandType.Category == ILTypeCategory.Struct)
-                throw new ParserException(string.Format("Struct operand is not valid for operator {0}.", OperatorType.ToString()), TokenIndex, Token);
-            var handlers = new Dictionary<IEnumerable<BinaryOperatorType>, Func<ILTypeSpecifier>>
+            ILType leftOperandType = LeftOperand.GetResultType(context);
+            ILType rightOperandType = RightOperand.GetResultType(context);
+            Sort(ref leftOperandType, ref rightOperandType); //Putting the input types in a specific order simplifies code below (Sort Order: Pointer, Integral, Float)
+            var handlers = new Dictionary<IEnumerable<BinaryOperatorType>, Func<ILType>>
             {
-                { new BinaryOperatorType[] { BinaryOperatorType.Divide, BinaryOperatorType.DivideEqual, BinaryOperatorType.DoubleEqual, BinaryOperatorType.Equal, BinaryOperatorType.Greater, BinaryOperatorType.GreaterEqual, BinaryOperatorType.Less, BinaryOperatorType.LessEqual, BinaryOperatorType.Minus, BinaryOperatorType.MinusEqual, BinaryOperatorType.NotEqual, BinaryOperatorType.Plus, BinaryOperatorType.PlusEqual, BinaryOperatorType.Star, BinaryOperatorType.StarEqual }, () =>
+                //Integral Types Only
+                {new BinaryOperatorType[] { BinaryOperatorType.Ampersand, BinaryOperatorType.AmpersandEqual, BinaryOperatorType.Caret, BinaryOperatorType.CaretEqual, BinaryOperatorType.DoubleAmpersand, BinaryOperatorType.DoublePipe, BinaryOperatorType.Mod, BinaryOperatorType.ModEqual, BinaryOperatorType.Pipe, BinaryOperatorType.PipeEqual, BinaryOperatorType.ShiftLeft, BinaryOperatorType.ShiftLeftEqual, BinaryOperatorType.ShiftRight, BinaryOperatorType.ShiftRightEqual }, () =>
                     {
-                        BaseType leftType = (leftOperandType.Category == ILTypeCategory.Base) ? 
+                        if ((leftOperandType.Category != ILTypeCategory.Base) || (rightOperandType.Category != ILTypeCategory.Base))
+                            throw new ParserException(string.Format("Unable to apply operator {0} to non-integral type.", OperatorType), TokenIndex, Token);
+                        BaseType leftBaseType = (leftOperandType as ILBaseType).Type;
+                        BaseType rightBaseType = (rightOperandType as ILBaseType).Type;
+                        if (!Types.IsIntegralType(leftBaseType) || !Types.IsIntegralType(rightBaseType))
+                            throw new ParserException(string.Format("Unable to apply operator {0} to non-integral type.", OperatorType), TokenIndex, Token);
+                        int opSizeLeft = Types.GetBaseTypeSize(leftBaseType);
+                        int opSizeRight = Types.GetBaseTypeSize(rightBaseType);
+                        int resultSize = Math.Max(opSizeLeft, opSizeRight);
+                        BaseType resultType = Types.GetIntegralTypeBySize(resultSize);
+                        return new ILBaseType(resultType);
+                    }
+                },
+                //Integral, Float Types
+                { new BinaryOperatorType[] { BinaryOperatorType.Divide, BinaryOperatorType.DivideEqual, BinaryOperatorType.DoubleEqual, BinaryOperatorType.Equal, BinaryOperatorType.Greater, BinaryOperatorType.GreaterEqual, BinaryOperatorType.Less, BinaryOperatorType.LessEqual, BinaryOperatorType.NotEqual, BinaryOperatorType.Star, BinaryOperatorType.StarEqual }, () =>
+                    {
+                        if ((leftOperandType.Category != ILTypeCategory.Base) || (rightOperandType.Category != ILTypeCategory.Base))
+                            throw new ParserException(string.Format("Unable to apply operator {0} to non-integral type.", OperatorType), TokenIndex, Token);
+                        return GetBaseTypeResultType(leftOperandType,rightOperandType);
+                    }
+                },
+                //Integral, Float, Pointer Types
+                { new BinaryOperatorType[] { BinaryOperatorType.Minus, BinaryOperatorType.MinusEqual, BinaryOperatorType.Plus, BinaryOperatorType.PlusEqual }, () =>
+                    {
+                        return GetBaseTypeResultType(leftOperandType, rightOperandType);
                     }
                 }
             };
             return handlers.First(n => n.Key.Contains(OperatorType)).Value();
         }
 
-        public override void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        private ILType GetBaseTypeResultType(ILType leftType, ILType rightType) //Assumes args are sorted
         {
-            RightOperand.GenerateIL(context, output);
-            LeftOperand.GenerateIL(context, output);
+            BaseType leftBaseType = leftType.GetBaseType();
+            BaseType rightBaseType = rightType.GetBaseType();
+            if (leftBaseType != BaseType.Pointer)
+            {
+                if (Types.IsIntegralType(leftBaseType) && Types.IsIntegralType(rightBaseType)) //Both Integral Types
+                {
+                    int opSizeLeft = Types.GetBaseTypeSize(leftBaseType);
+                    int opSizeRight = Types.GetBaseTypeSize(rightBaseType);
+                    int resultSize = Math.Max(opSizeLeft, opSizeRight);
+                    BaseType resultType = Types.GetIntegralTypeBySize(resultSize);
+                    return new ILBaseType(resultType);
+                }
+                else if (Types.IsIntegralType(leftBaseType) && Types.IsFloatType(rightBaseType)) //Mixed Types
+                {
+                    int floatSize = 0;
+                    if (Types.IsFloatType(leftBaseType))
+                        floatSize = Types.GetBaseTypeSize(leftBaseType);
+                    else
+                        floatSize = Types.GetBaseTypeSize(rightBaseType);
+                    BaseType resultType = Types.GetFloatTypeBySize(floatSize);
+                    return new ILBaseType(resultType);
+                }
+                else if (Types.IsFloatType(leftBaseType) && Types.IsFloatType(rightBaseType)) //Both Float Types
+                {
+                    int opSizeLeft = Types.GetBaseTypeSize(leftBaseType);
+                    int opSizeRight = Types.GetBaseTypeSize(rightBaseType);
+                    int resultSize = Math.Max(opSizeLeft, opSizeRight);
+                    BaseType resultType = Types.GetIntegralTypeBySize(resultSize);
+                    return new ILBaseType(resultType);
+                }
+                else
+                {
+                    throw new InternalCompilerException("Unexpected combination of base types.");
+                }
+            }
+            else //leftBaseType == BaseType.Pointer
+            {
+                if (Types.IsFloatType(rightBaseType))
+                    throw new ParserException(string.Format("Cannot apply operator {0} to Pointer and {1}.", OperatorType, rightBaseType), TokenIndex, Token);
+                return leftType;
+            }
+        }
+
+        protected override void GenerateILInternal(ILGenerationContext context)
+        {
+            RightOperand.GenerateIL(context);
+            LeftOperand.GenerateIL(context);
             switch (OperatorType)
             {
                 case BinaryOperatorType.Ampersand:
@@ -94,6 +160,41 @@ namespace CSubCompiler.AST
                 case BinaryOperatorType.Star:
                     break;
             }
+        }
+
+        private BaseType GetBaseTypeFromILType(ILType typeSpec)
+        {
+            switch (typeSpec.Category)
+            {
+                case ILTypeCategory.Base:
+                    return (typeSpec as ILBaseType).Type;
+                case ILTypeCategory.Pointer:
+                    return BaseType.Pointer;
+                case ILTypeCategory.Struct:
+                    throw new InternalCompilerException("Attempt to retrieve base type of struct.");
+                default:
+                    throw new InternalCompilerException("Attempt to retrieve base type of unknown type category.");
+            }
+        }
+
+        private void Sort(ref ILType a, ref ILType b)
+        {
+            int aPriority = (a.Category == ILTypeCategory.Pointer) ? 0 :
+                (a.Category != ILTypeCategory.Base) ? 3 :
+                (Types.IsFloatType((a as ILBaseType).Type)) ? 2 :
+                (Types.IsIntegralType((a as ILBaseType).Type)) ? 1 : 3;
+            int bPriority = (b.Category == ILTypeCategory.Pointer) ? 0 :
+                (b.Category != ILTypeCategory.Base) ? 3 :
+                (Types.IsFloatType((b as ILBaseType).Type)) ? 2 :
+                (Types.IsIntegralType((b as ILBaseType).Type)) ? 1 : 3;
+            if (bPriority < aPriority)
+                Swap(ref a, ref b);
+        }
+        private void Swap(ref ILType a, ref ILType b)
+        {
+            ILType buffer = a;
+            a = b;
+            b = buffer;
         }
         #endregion
     }

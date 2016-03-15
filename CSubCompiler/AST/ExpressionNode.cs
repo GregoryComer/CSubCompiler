@@ -8,29 +8,32 @@ using CSubCompiler.Language;
 
 namespace CSubCompiler.AST
 {
-    public class ExpressionNode : ISubExpressionNode
+    public class ExpressionNode : SubExpressionNode
     {
-        ISubExpressionNode Value;
+        SubExpressionNode Value;
 
-        public ExpressionNode(ISubExpressionNode value)
+        public ExpressionNode(SubExpressionNode value, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Value = value;
         }
 
-        public void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        protected override void GenerateILInternal(ILGenerationContext context)
         {
-            Value.GenerateIL(context, output);
+            Value.GenerateIL(context);
         }
 
         public static ExpressionNode Parse(Token[] tokens, ref int i)
         {
-            ISubExpressionNode exp = ParseQ(tokens, ref i, Operators.MinPrecedence);
-            return new ExpressionNode(exp);
+            Token startToken = tokens[i];
+            int startIndex = i;
+
+            SubExpressionNode exp = ParseQ(tokens, ref i, Operators.MinPrecedence);
+            return new ExpressionNode(exp, startToken, startIndex);
         }
 
-        public static ISubExpressionNode ParseQ(Token[] tokens, ref int i, int q) //Predence climbing algorithm (q represents minimum precedence handled by this loop)
+        public static SubExpressionNode ParseQ(Token[] tokens, ref int i, int q) //Predence climbing algorithm (q represents minimum precedence handled by this loop)
         {
-            ISubExpressionNode val = ParseSubExpression(tokens, ref i, q);
+            SubExpressionNode val = ParseSubExpression(tokens, ref i, q);
             while (i < tokens.Length && (BinaryOperatorNode.IsBinaryOperator(tokens, i)) || UnaryPostOperatorNode.IsUnaryPostOperator(tokens, i))
             {
                 if (BinaryOperatorNode.IsBinaryOperator(tokens, i))
@@ -41,14 +44,14 @@ namespace CSubCompiler.AST
                     if (opPrecedence <= q) //Lower precedence values indicate higher precedence
                     {
                         i++; //Consume operator
-                        ISubExpressionNode right = ParseQ(tokens, ref i, (opAssoc == OperatorAssociativity.Left) ? opPrecedence - 1 : opPrecedence);
+                        SubExpressionNode right = ParseQ(tokens, ref i, (opAssoc == OperatorAssociativity.Left) ? opPrecedence - 1 : opPrecedence);
                         if (opAssoc == OperatorAssociativity.Left)
                         {
-                            val = new BinaryOperatorNode(opType, val, right, i, tokens[i]);
+                            val = new BinaryOperatorNode(opType, val, right, tokens[i], i);
                         }
                         else //Right associative
                         {
-                            val = new BinaryOperatorNode(opType, val, right, i, tokens[i]); //TEMPORARY, TODO: DETERMINE IF WORKS
+                            val = new BinaryOperatorNode(opType, val, right, tokens[i], i); //TEMPORARY, TODO: DETERMINE IF WORKS
                         }
                     }
                     else
@@ -61,7 +64,7 @@ namespace CSubCompiler.AST
                     var opType = Operators.UnaryPostOperatorTokenTable[tokens[i].Type];
                     int opPrecedence = Operators.UnaryPostOperatorPrecedenceTable[opType];
                     var opAssoc = Operators.UnaryPostOperatorAssociativityTable[opType];
-                    
+
                     if (opPrecedence <= q || (opPrecedence == q && opAssoc == OperatorAssociativity.Left))
                     {
                         val = UnaryPostOperatorNode.ParseWithOperand(tokens, ref i, val);
@@ -75,9 +78,9 @@ namespace CSubCompiler.AST
             return val;
         }
 
-        public static ISubExpressionNode ParseSubExpression(Token[] tokens, ref int i, int q)
+        public static SubExpressionNode ParseSubExpression(Token[] tokens, ref int i, int q)
         {
-            ISubExpressionNode exp;
+            SubExpressionNode exp;
             if (tokens[i].Type == TokenType.LeftParen) //Expression in parenthesis
             {
                 exp = Parse(tokens, ref i);
@@ -86,6 +89,10 @@ namespace CSubCompiler.AST
             else if (tokens[i].Type == TokenType.Int) //Int literals
             {
                 exp = IntLiteralNode.Parse(tokens, ref i);
+            }
+            else if (tokens[i].Type == TokenType.Float)
+            {
+                exp = FloatLiteralNode.Parse(tokens, ref i);
             }
             else if (VariableNode.IsVariable(tokens, i))
             {
@@ -119,9 +126,41 @@ namespace CSubCompiler.AST
             return exp;
         }
 
-        public ILTypeSpecifier GetResultType(ILGenerationContext context)
+        public static bool IsSubExpression(Token[] tokens, int i)
         {
-            throw new NotImplementedException();
+            if (tokens[i].Type == TokenType.LeftParen) //Expression in parenthesis
+            {
+                return true; //TODO: UPDATE TO HANDLE CASTS
+            }
+            else if (tokens[i].Type == TokenType.Int) //Int literals
+            {
+                return true;
+            }
+            else if (tokens[i].Type == TokenType.Float)
+            {
+                return true;
+            }
+            else if (VariableNode.IsVariable(tokens, i))
+            {
+                return true;
+            }
+            else if (FunctionCallNode.IsFunctionCall(tokens, i))
+            {
+                return true;
+            }
+            else if (UnaryPreOperatorNode.IsUnaryPreOperator(tokens, i))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        
+        public override ILType GetResultType(ILGenerationContext context)
+        {
+            return Value.GetResultType(context);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public FunctionDeclarationNode(TypeReferenceNode returnType, string name, FunctionParameterNode[] parameters)
+        public FunctionDeclarationNode(TypeReferenceNode returnType, string name, FunctionParameterNode[] parameters, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Name = name;
             Parameters = parameters;
@@ -33,6 +33,9 @@ namespace CSubCompiler.AST
 
         public static new FunctionDeclarationNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             TypeReferenceNode returnType = TypeReferenceNode.Parse(tokens, ref i);
             string name = Parser.Expect(tokens, ref i, TokenType.AlphaNum).Literal;
             Parser.Expect(tokens, ref i, TokenType.LeftParen);
@@ -43,7 +46,7 @@ namespace CSubCompiler.AST
             }
             Parser.Expect(tokens, ref i, TokenType.RightParen);
             Parser.Expect(tokens, ref i, TokenType.Semicolon);
-            return new FunctionDeclarationNode(returnType, name, parameters.ToArray());
+            return new FunctionDeclarationNode(returnType, name, parameters.ToArray(), startToken, startIndex);
         }
 
         public static bool IsFunctionDefinitionNode(Token[] tokens, int i)

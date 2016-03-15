@@ -8,7 +8,7 @@ using CSubCompiler.Language;
 
 namespace CSubCompiler.AST
 {
-    public class FunctionCallNode : ISubExpressionNode
+    public class FunctionCallNode : SubExpressionNode
     {
         public ExpressionNode[] Arguments
         {
@@ -21,7 +21,7 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public FunctionCallNode(IdentifierNode identifier, ExpressionNode[] arguments)
+        public FunctionCallNode(IdentifierNode identifier, ExpressionNode[] arguments, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Arguments = arguments;
             Identifier = identifier;
@@ -29,6 +29,9 @@ namespace CSubCompiler.AST
 
         public static FunctionCallNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             IdentifierNode identifier = IdentifierNode.Parse(tokens, ref i);
             if (tokens[i].Type != TokenType.LeftParen)
             {
@@ -50,7 +53,7 @@ namespace CSubCompiler.AST
                 }
             }
             Parser.Expect(tokens, ref i, TokenType.RightParen);
-            return new FunctionCallNode(identifier, args.ToArray());
+            return new FunctionCallNode(identifier, args.ToArray(), startToken, startIndex);
         }
 
         public static bool IsFunctionCall(Token[] tokens, int i)
@@ -70,12 +73,12 @@ namespace CSubCompiler.AST
             }
         }
 
-        public void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        protected void GenerateILInternal(ILGenerationContext context)
         {
             throw new NotImplementedException();
         }
 
-        public ILTypeSpecifier GetResultType(ILGenerationContext context)
+        public override ILType GetResultType(ILGenerationContext context)
         {
             throw new NotImplementedException();
         }

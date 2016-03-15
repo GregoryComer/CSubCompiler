@@ -113,7 +113,7 @@ namespace CSubCompiler.IL
     /// </summary>
     public struct ILAddF : IILFloatInstruction
     {
-
+        
     }
     /// <summary>
     /// Pops the top two values from the floating point stack, pushes A - B
@@ -127,42 +127,42 @@ namespace CSubCompiler.IL
     /// </summary>
     public struct ILRSubF : IILFloatInstruction
     {
-
+        
     }
     /// <summary>
     /// Pops the top two values from the floating point stack, pushes A * B
     /// </summary>
     public struct ILMulF : IILFloatInstruction
     {
-
+        
     }
     /// <summary>
     /// Pops the top two values from the floating point stack, pushes A / B
     /// </summary>
     public struct ILDivF : IILFloatInstruction
     {
-
+        
     }
     /// <summary>
     /// Pops the top two values from the floating point stack, pushes B / A
     /// </summary>
     public struct ILRDivF : IILFloatInstruction
     {
-
+        
     }
     /// <summary>
     /// Pops the top value from the floating point stack, pushes |A|
     /// </summary>
     public struct ILAbsF : IILFloatInstruction
     {
-
+        
     }
     /// <summary>
     /// Pops the top value from the floating point stack, pushes -A
     /// </summary>
     public struct ILNegF : IILFloatInstruction
     {
-
+        
     }
     /// <summary>
     /// Pops the top value from the floating point stack, pushes round(A) (based on current rounding mode) TODO: Support getting/setting rounding mode

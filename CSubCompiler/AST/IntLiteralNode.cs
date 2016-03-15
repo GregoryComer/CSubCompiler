@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CSubCompiler.IL;
+using CSubCompiler.Language;
 
 namespace CSubCompiler.AST
 {
-    public class IntLiteralNode : LiteralNode
+    public class IntLiteralNode : LiteralNode // Todo: Handle int size/sign suffixes
     {
         public int Value
         {
@@ -15,7 +16,7 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public IntLiteralNode(int value)
+        public IntLiteralNode(int value, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Value = value;
         }
@@ -33,17 +34,17 @@ namespace CSubCompiler.AST
                 throw new ParserException("Invalid integer literal.", i, tokens[i]); //Should not occur. Any invalid int literals should be caught by lexer. This is a fallback.
             }
             i++; //Consume token
-            return new IntLiteralNode(value);
+            return new IntLiteralNode(value, tokens[i], i);
         }
 
-        public override void GenerateIL(ILGenerationContext context, List<IILInstruction> output)
+        protected override void GenerateILInternal(ILGenerationContext context)
         {
-            throw new NotImplementedException();
+            context.Output.Write(new ILLoadC { Constant = Value, Size = (GeneralOperandSize)Types.GetBaseTypeSize(BaseType.Int) });
         }
 
-        public override ILTypeSpecifier GetResultType(ILGenerationContext context)
+        public override ILType GetResultType(ILGenerationContext context)
         {
-            throw new NotImplementedException();
+            return new ILBaseType(Language.BaseType.Int);
         }
     }
 }

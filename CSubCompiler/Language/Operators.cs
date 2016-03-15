@@ -179,6 +179,9 @@ namespace CSubCompiler.Language
         Left,
         Right
     }
+    /*
+
+    */
     public enum BinaryOperatorType
     {
         Ampersand,

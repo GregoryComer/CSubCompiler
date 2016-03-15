@@ -20,7 +20,7 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public IdentifierNode(string[] parts, JoinType[] joins)
+        public IdentifierNode(string[] parts, JoinType[] joins, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             if (joins.Length != parts.Length - 1)
             {
@@ -45,6 +45,9 @@ namespace CSubCompiler.AST
 
         public static IdentifierNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             List<string> parts = new List<string>();
             List<JoinType> joins = new List<JoinType>();
 
@@ -73,7 +76,7 @@ namespace CSubCompiler.AST
                 i++; //Advance over AlphaNum part
             }
 
-            return new IdentifierNode(parts.ToArray(), joins.ToArray());
+            return new IdentifierNode(parts.ToArray(), joins.ToArray(), startToken, startIndex);
         }
 
         public static bool IsIdentifier(Token[] tokens, int i) //Todo: Determine if below logic is sufficient and unambigous

@@ -7,36 +7,29 @@ using CSubCompiler.Language;
 
 namespace CSubCompiler.AST
 {
-    public class TypeReferenceNode
+    public class TypeReferenceNode : Node
     {
         public string Name { get; set; }
         public TypeClassification Classification { get; set; }
-        public bool Const { get; set; }
-        public bool Extern { get; set; }
-        public bool Static { get; set; }
-        public bool Volatile { get; set; }
+        public TypeModifiers Modifiers { get; set; }
         /// <summary>
         /// For pointer types, the type pointed to.
         /// </summary>
         public TypeReferenceNode InnerType { get; set; }
         public ITypeDefinitionNode EmbeddedTypeDefinition { get; set; }
 
-        public TypeReferenceNode(string name, TypeClassification classification, bool modStatic, bool modExtern, bool modVolatile)
+        public TypeReferenceNode(string name, TypeClassification classification, TypeModifiers modifiers, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Name = name;
             Classification = classification;
-            Static = modStatic;
-            Extern = modExtern;
-            Volatile = modVolatile;
+            Modifiers = modifiers;
         }
-        public TypeReferenceNode(string name, TypeClassification classification, bool modStatic, bool modExtern, bool modVolatile, TypeReferenceNode inner)
+        public TypeReferenceNode(string name, TypeClassification classification, TypeModifiers modifiers, TypeReferenceNode inner, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Name = name;
             Classification = classification;
+            Modifiers = modifiers;
             InnerType = inner;
-            Static = modStatic;
-            Extern = modExtern;
-            Volatile = modVolatile;
         }
 
         public static bool IsTypeReferenceNode(Token[] tokens, int i)
@@ -54,9 +47,11 @@ namespace CSubCompiler.AST
         }
         public static TypeReferenceNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startTokenIndex = i;
+
             TypeReferenceNode outer = null;
-            bool modConst, modExtern, modStatic, modVolatile;
-            ReadModifiers(tokens, ref i, out modConst, out modExtern, out modStatic, out modVolatile);
+            TypeModifiers modifiers = ReadModifiers(tokens, ref i);
             if (Parser.CheckLiteral(tokens, i, TokenType.AlphaNum, "struct"))
             {
                 i++; //Consume struct token
@@ -70,7 +65,7 @@ namespace CSubCompiler.AST
                 }
                 if (outer != null)
                     throw new ParserException("Unexpected token in type.", i, tokens[i]);
-                outer = new TypeReferenceNode(structName, TypeClassification.Struct, modStatic, modExtern, modVolatile);
+                outer = new TypeReferenceNode(structName, TypeClassification.Struct, modifiers, startToken, startTokenIndex);
                 outer.EmbeddedTypeDefinition = embeddedStruct;
             }
             else
@@ -88,65 +83,60 @@ namespace CSubCompiler.AST
                 typeName += typeNameMain;
                 if (outer != null)
                     throw new ParserException("Unexpected token in type.", i, tokens[i]);
-                outer = new TypeReferenceNode(typeName, TypeClassification.Standard, modStatic, modExtern, modVolatile);
+                outer = new TypeReferenceNode(typeName, TypeClassification.Standard, modifiers, startToken, startTokenIndex);
             }
 
             while (Parser.Check(tokens, i, TokenType.Star) || IsModifier(tokens, i))
             {
-                ReadModifiers(tokens, ref i, out modConst, out modExtern, out modStatic, out modVolatile);
+                modifiers = ReadModifiers(tokens, ref i);
                 Parser.Expect(tokens, ref i, TokenType.Star);
-                outer = new TypeReferenceNode(null, TypeClassification.Pointer, modStatic, modExtern, modVolatile, outer);
+                outer = new TypeReferenceNode(null, TypeClassification.Pointer, modifiers, outer, startToken, startTokenIndex);
             }
             return outer;
         }
 
-        internal static void ReadModifiers(Token[] tokens, ref int i, out bool modConst, out bool modExtern, out bool modStatic, out bool modVolatile)
+        internal static TypeModifiers ReadModifiers(Token[] tokens, ref int i)
         {
-            modVolatile = false;
-            modExtern = false;
-            modStatic = false;
-            modConst = false;
-            bool readModifier;
-            do
+            TypeModifiers modifiers = TypeModifiers.None;
+            while (true)
             {
-                readModifier = false;
-                if (Parser.CheckLiteral(tokens, i, TokenType.AlphaNum, "volatile"))
+                if (Parser.CheckLiteral(tokens, i, TokenType.AlphaNum, "const"))
                 {
-                    if (modVolatile)
-                        throw new ParserException("Multiple volatile modifers for type.", i, tokens[i]);
-                    modVolatile = true;
-                    readModifier = true;
+                    if ((modifiers & TypeModifiers.Const) == 0)
+                        throw new ParserException("Multiple const modifiers for type.", i, tokens[i]);
+                    modifiers &= TypeModifiers.Const;
                 }
                 else if (Parser.CheckLiteral(tokens, i, TokenType.AlphaNum, "extern"))
                 {
-                    if (modExtern)
+                    if ((modifiers & TypeModifiers.Extern) == 0)
                         throw new ParserException("Multiple extern modifers for type.", i, tokens[i]);
-                    modExtern = true;
-                    readModifier = true;
+                    modifiers &= TypeModifiers.Extern;
                 }
                 else if (Parser.CheckLiteral(tokens, i, TokenType.AlphaNum, "static"))
                 {
-                    if (modStatic)
+                    if ((modifiers & TypeModifiers.Static) == 0)
                         throw new ParserException("Multiple static modifiers for type.", i, tokens[i]);
-                    modStatic = true;
-                    readModifier = true;
+                    modifiers &= TypeModifiers.Static;
                 }
-                else if (Parser.CheckLiteral(tokens, i, TokenType.AlphaNum, "const"))
+                else if (Parser.CheckLiteral(tokens, i, TokenType.AlphaNum, "volatile"))
                 {
-                    if (modConst)
-                        throw new ParserException("Multiple const modifiers for type.", i, tokens[i]);
-                    modConst = true;
-                    readModifier = true;
+                    if ((modifiers & TypeModifiers.Volatile) == 0)
+                        throw new ParserException("Multiple volatile modifers for type.", i, tokens[i]);
+                    modifiers &= TypeModifiers.Volatile;
                 }
-                if (readModifier)
-                    i++;
-            } while (readModifier);
+                else
+                {
+                    break;
+                }
+                i++;
+            }
+            return modifiers;
         }
 
-        private static string[] Modifiers = { "extern", "static", "volatile", "const" };
+        private static string[] ValidModifiers = { "extern", "static", "volatile", "const" };
         private static bool IsModifier(Token[] tokens, int i)
         {
-            return Modifiers.Contains(tokens[i].Literal);
+            return ValidModifiers.Contains(tokens[i].Literal);
         }
     }
 

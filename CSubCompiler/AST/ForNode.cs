@@ -29,7 +29,7 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public ForNode(StatementNode initialization, ExpressionNode condition, StatementNode afterthought, BlockNode body)
+        public ForNode(StatementNode initialization, ExpressionNode condition, StatementNode afterthought, BlockNode body, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Initialization = initialization;
             Condition = condition;
@@ -44,6 +44,9 @@ namespace CSubCompiler.AST
 
         public static new ForNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             Parser.ExpectLiteral(tokens, ref i, TokenType.AlphaNum, "for");
             Parser.Expect(tokens, ref i, TokenType.LeftParen);
             StatementNode initialization = null;
@@ -65,7 +68,7 @@ namespace CSubCompiler.AST
             }
             Parser.Expect(tokens, ref i, TokenType.RightParen);
             BlockNode body = BlockNode.Parse(tokens, ref i);
-            return new ForNode(initialization, condition, afterthought, body);
+            return new ForNode(initialization, condition, afterthought, body, startToken, startIndex);
         }
     }
 }

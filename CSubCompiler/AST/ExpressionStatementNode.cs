@@ -14,15 +14,18 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public ExpressionStatementNode(ExpressionNode expression)
+        public ExpressionStatementNode(ExpressionNode expression, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Expression = expression;
         }
 
         public static new ExpressionStatementNode Parse(Token[] tokens, ref int i)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             ExpressionNode expression = ExpressionNode.Parse(tokens, ref i);
-            return new ExpressionStatementNode(expression);
+            return new ExpressionStatementNode(expression, startToken, startIndex);
         }
     }
 }

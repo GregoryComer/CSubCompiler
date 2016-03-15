@@ -19,7 +19,7 @@ namespace CSubCompiler.AST
             set;
         }
 
-        public FunctionParameterNode(TypeReferenceNode type, string name)
+        public FunctionParameterNode(TypeReferenceNode type, string name, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             Name = name;
             Type = type;
@@ -32,13 +32,16 @@ namespace CSubCompiler.AST
 
         public static FunctionParameterNode Parse(Token[] tokens, ref int i, bool requireName)
         {
+            Token startToken = tokens[i];
+            int startIndex = i;
+
             TypeReferenceNode type = TypeReferenceNode.Parse(tokens, ref i);
             string name = null;
             if (tokens[i].Type == TokenType.AlphaNum)
             {
                 name = Parser.Expect(tokens, ref i, TokenType.AlphaNum).Literal;
             }
-            return new FunctionParameterNode(type, name);
+            return new FunctionParameterNode(type, name, startToken, startIndex);
         }
     }
 }

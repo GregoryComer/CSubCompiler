@@ -8,6 +8,11 @@ namespace CSubCompiler.AST
 {
     public class TopLevelNode : Node
     {
+        public TopLevelNode(Token token, int tokenIndex) : base(token, tokenIndex)
+        {
+
+        }
+
         public static TopLevelNode Parse(Token[] tokens, ref int i)
         {
             if (FunctionDefinitionNode.IsFunctionDefinitionOrDeclaration(tokens, i))
