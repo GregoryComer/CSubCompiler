@@ -15,5 +15,7 @@ namespace CSubCompiler.AST
         }
 
         public abstract ILType GetResultType(ILGenerationContext context);
+        public abstract bool IsLValue(ILGenerationContext context);
+        public abstract ILAddressingReference GenerateLValue(ILGenerationContext context);
     }
 }

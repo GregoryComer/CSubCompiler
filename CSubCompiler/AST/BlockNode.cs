@@ -20,7 +20,7 @@ namespace CSubCompiler.AST
             Statements = statements;
         }
 
-        public void GenerateILInternal(ILGenerationContext context)
+        protected override void GenerateILInternal(ILGenerationContext context)
         {
 
         }

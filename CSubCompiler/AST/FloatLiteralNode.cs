@@ -42,7 +42,7 @@ namespace CSubCompiler.AST
 
         protected override void GenerateILInternal(ILGenerationContext context)
         {
-            context.Output.Write(new ILLoadCF { Constant = Value });
+            context.Output.Write(new ILLoadF { Address = ILAddressingReference.CreateConstant(1.0), Size = FloatOperandSize.Size32 });
         }
 
         public override ILType GetResultType(ILGenerationContext context)

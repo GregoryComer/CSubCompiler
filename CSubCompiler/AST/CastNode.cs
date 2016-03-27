@@ -15,7 +15,8 @@ namespace CSubCompiler.AST
 
         public CastNode(SubExpressionNode expression, TypeReferenceNode type, Token token, int tokenIndex) : base(token, tokenIndex)
         {
-
+            Expression = expression;
+            Type = type;
         }
 
         public override ILType GetResultType(ILGenerationContext context)
@@ -23,13 +24,24 @@ namespace CSubCompiler.AST
             return context.ResolveTypeReference(Type).Type; //TODO: CHECK WHETHER IGNORING MODIFIERS HERE COULD CAUSE ISSUES
         }
 
-        public static bool IsCast(Token[] tokens, int i)
+        public static bool IsCast(Token[] tokens, int i) //TODO: CHECK IF PRECEDENCE SHOULD BE CONSIDERED IN ISSUBEXPRESSION CALL
         {
             return (Parser.Check(tokens, i++, TokenType.LeftParen)
                 && Parser.Check(tokens, i, TokenType.AlphaNum)
-                && Keywords.IsNonTypeKeyword(tokens[i++].Literal)
-                && Parser.Check(tokens, i, TokenType.RightParen)
+                && !Keywords.IsNonTypeKeyword(tokens[i++].Literal)
+                && Parser.Check(tokens, i++, TokenType.RightParen)              
                 && ExpressionNode.IsSubExpression(tokens, i));
+        }
+        
+        public static CastNode Parse(Token[] tokens, ref int i)
+        {
+            Token startToken = tokens[i];
+            int startIndex = i;
+            Parser.Expect(tokens, ref i, TokenType.LeftParen);
+            var type = TypeReferenceNode.Parse(tokens, ref i);
+            Parser.Expect(tokens, ref i, TokenType.RightParen);
+            var operand = ExpressionNode.ParseQ(tokens, ref i, Operators.CastPrecedence);
+            return new CastNode(operand, type, startToken, startIndex);
         }
     }
 }

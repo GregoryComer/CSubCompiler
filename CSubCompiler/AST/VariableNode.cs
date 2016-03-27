@@ -53,7 +53,7 @@ namespace CSubCompiler.AST
             }
         }
 
-        public void GenerateILInternal(ILGenerationContext context)
+        protected override void GenerateILInternal(ILGenerationContext context)
         {
             throw new NotImplementedException();
         }

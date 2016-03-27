@@ -157,7 +157,8 @@ namespace CSubCompiler.Language
         };
         #endregion
         #region Misc
-        public static int MinPrecedence = 15;
+        public const int MinPrecedence = 15;
+        public const int CastPrecedence = 2;
         #endregion
 
         public static bool IsBinaryOperator(Token[] tokens, int i)

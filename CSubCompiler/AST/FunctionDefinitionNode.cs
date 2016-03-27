@@ -37,7 +37,7 @@ namespace CSubCompiler.AST
             ReturnType = returnType;
         }
 
-        public static FunctionDefinitionNode Parse(Token[] tokens, ref int i)
+        public static new FunctionDefinitionNode Parse(Token[] tokens, ref int i)
         {
             Token startToken = tokens[i];
             int startIndex = i;

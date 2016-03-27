@@ -10,44 +10,14 @@ namespace CSubCompiler.IL
     /// <summary>
     /// Pushes a constant value to the general stack
     /// </summary>
-    public struct ILLoadC : IILGeneralInstruction
+    public struct ILLoad : IILGeneralInstruction
     {
-        public long Constant;
+        public ILAddressingReference Address;
         public GeneralOperandSize Size;
     }
-    /// <summary>
-    /// Pushes the value at [Address] onto the general stack
-    /// </summary>
-    public struct ILLoadR : IILGeneralInstruction
-    {
-        public ulong Address;
-        public GeneralOperandSize Size;
-    }
-    /// <summary>
-    /// Pops the top value off of the general stack
-    /// Pushes the value at [Top + Address] onto the general stack
-    /// </summary>
-    public struct ILLoadRO : IILGeneralInstruction
-    {
-        public ulong Address;
-        public GeneralOperandSize OperandSize;
-    }
-    /// <summary>
-    /// Pops the top value off of the general stack
-    /// Pushes the value at [Address + Top * Scale] onto the general stack
-    /// </summary>
-    public struct ILLoadROS : IILGeneralInstruction
-    {
-        public ulong Address;
-        public AddressingScaleFactor Scale;
-        public GeneralOperandSize OperandSize;
-    }
-    /// <summary>
-    /// Pops the top value off the stack into [Address]
-    /// </summary>
     public struct ILStore : IILGeneralInstruction
     {
-        public ulong Address;
+        public ILAddressingReference Address;
         public GeneralOperandSize Size;
     }
     /// <summary>
@@ -72,42 +42,14 @@ namespace CSubCompiler.IL
     /// <summary>
     /// Pushes a constant value to the floating point stack
     /// </summary>
-    public struct ILLoadCF : IILFloatInstruction
+    public struct ILLoadF : IILFloatInstruction
     {
-        public double Constant;
+        public ILAddressingReference Address;
+        public FloatOperandSize Size;
     }
-    /// <summary>
-    /// Pushes the value at [Address] onto the floating point stack
-    /// </summary>
-    public struct ILLoadRF : IILFloatInstruction
-    {
-        public ulong Address;
-        public FloatOperandSize OperandSize;
-    }
-    /// <summary>
-    /// Pops the top vlaue off of the general stack
-    /// Pushes the value at [Address + Top] onto the floating point stack
-    /// </summary>
-    public struct ILLoadROF : IILFloatInstruction
-    {
-        public ulong Address;
-        public FloatOperandSize OperandSize;
-    }
-    /// <summary>
-    /// Pops the top value off of the stack
-    /// Pushes the value at [Adress + Top * Scale] onto the floating point stack
-    /// </summary>
-    public struct ILLoadROSF : IILFloatInstruction
-    {
-        public ulong Address;
-        public AddressingScaleFactor Scale;
-    }
-    /// <summary>
-    /// Pops the top value off the floating point stack into [Address]
-    /// </summary>
     public struct ILStoreF : IILFloatInstruction
     {
-        public ulong Address;
+        public ILAddressingReference Address;
         public FloatOperandSize Size;
     }
     /// <summary>
@@ -115,7 +57,7 @@ namespace CSubCompiler.IL
     /// </summary>
     public struct ILPeekF : IILFloatInstruction
     {
-        public ulong Address;
+        public ILAddressingReference Address;
         public FloatOperandSize Size;
     }
     /// <summary>

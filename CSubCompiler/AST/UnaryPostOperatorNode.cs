@@ -13,9 +13,6 @@ namespace CSubCompiler.AST
         public UnaryPostOperatorType OperatorType;
         public SubExpressionNode Operand;
 
-        public int TokenIndex;
-        public Token Token;
-
         public UnaryPostOperatorNode(UnaryPostOperatorType operatorType, SubExpressionNode operand, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             OperatorType = operatorType;
@@ -70,7 +67,7 @@ namespace CSubCompiler.AST
                     }
                     else if (Types.IsFloatType(baseType.Type))
                     {
-                        context.Output.Write(new ILLoadCF { Constant = 1.0f });
+                        context.Output.Write(new ILLoadF { Address = new ILAddressingReference() });
                         context.Output.Write(new ILAddF { });
                     }
                     else
@@ -99,7 +96,7 @@ namespace CSubCompiler.AST
                     }
                     else if (Types.IsFloatType(baseType.Type))
                     {
-                        context.Output.Write(new ILLoadCF { Constant = 1.0f });
+                        context.Output.Write(new ILLoadF { Address = ILAddressingReference.CreateConstant(1.0f), Size = (FloatOperandSize)Types.GetBaseTypeSize(baseType.Type) });
                         context.Output.Write(new ILAddF { });
                     }
                     else

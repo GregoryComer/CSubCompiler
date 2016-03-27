@@ -49,7 +49,7 @@
     <Compile Include="AST\TopLevelNode.cs" />
     <Compile Include="AST\TypedefNode.cs" />
     <Compile Include="AST\VariableDeclarationNode.cs" />
-    <Compile Include="AST\BinaryOperatorNode.cs" />
+    <Compile Include="AST\BinaryOperators\BinaryOperatorNode.cs" />
     <Compile Include="AST\BlockNode.cs" />
     <Compile Include="AST\BreakNode.cs" />
     <Compile Include="AST\CharLiteralNode.cs" />
@@ -78,6 +78,7 @@
     <Compile Include="IL\IILFloatInstruction.cs" />
     <Compile Include="IL\IILGeneralInstruction.cs" />
     <Compile Include="IL\IILInstruction.cs" />
+    <Compile Include="IL\ILAddressingReference.cs" />
     <Compile Include="IL\ILGenerationContext.cs" />
     <Compile Include="IL\ILOutputStream.cs" />
     <Compile Include="IL\ILScope.cs" />

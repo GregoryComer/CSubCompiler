@@ -132,7 +132,7 @@ namespace CSubCompiler.AST
                     }
                     else if (Types.IsFloatType(baseType.Type))
                     {
-                        context.Output.Write(new ILLoadCF { Constant = 1.0f });
+                        context.Output.Write(new ILLoadF { Address = ILAddressingReference.CreateConstant(1), Size = (FloatOperandSize)Types.GetBaseTypeSize(baseType.Type) });
                         context.Output.Write(new ILAddF { });
                     }
                     else
@@ -161,7 +161,7 @@ namespace CSubCompiler.AST
                     }
                     else if (Types.IsFloatType(baseType.Type))
                     {
-                        context.Output.Write(new ILLoadCF { Constant = 1.0f });
+                        context.Output.Write(new ILLoadF { Address = ILAddressingReference.CreateConstant(1), Size = (FloatOperandSize)Types.GetBaseTypeSize(baseType.Type) });
                         context.Output.Write(new ILAddF { });
                     }
                     else

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using CSubCompiler.IL;
 using CSubCompiler.Language;
 
-namespace CSubCompiler.AST
+namespace CSubCompiler.AST.BinaryOperators
 {
     public class BinaryOperatorNode : OperatorNode
     {
@@ -25,9 +25,6 @@ namespace CSubCompiler.AST
             get;
             set;
         }
-
-        public int TokenIndex;
-        public Token Token;
 
         public BinaryOperatorNode(BinaryOperatorType operatorType, SubExpressionNode leftOperand, SubExpressionNode rightOperand, Token token, int tokenIndex) : base(token, tokenIndex)
         {

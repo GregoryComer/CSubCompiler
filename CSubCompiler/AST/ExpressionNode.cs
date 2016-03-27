@@ -34,7 +34,7 @@ namespace CSubCompiler.AST
         public static SubExpressionNode ParseQ(Token[] tokens, ref int i, int q) //Predence climbing algorithm (q represents minimum precedence handled by this loop)
         {
             SubExpressionNode val = ParseSubExpression(tokens, ref i, q);
-            while (i < tokens.Length && (BinaryOperatorNode.IsBinaryOperator(tokens, i)) || UnaryPostOperatorNode.IsUnaryPostOperator(tokens, i))
+            while (i < tokens.Length && (BinaryOperatorNode.IsBinaryOperator(tokens, i) || UnaryPostOperatorNode.IsUnaryPostOperator(tokens, i)))
             {
                 if (BinaryOperatorNode.IsBinaryOperator(tokens, i))
                 {
@@ -81,8 +81,13 @@ namespace CSubCompiler.AST
         public static SubExpressionNode ParseSubExpression(Token[] tokens, ref int i, int q)
         {
             SubExpressionNode exp;
-            if (tokens[i].Type == TokenType.LeftParen) //Expression in parenthesis
+            if (CastNode.IsCast(tokens, i))
             {
+                exp = CastNode.Parse(tokens, ref i);
+            }
+            else if (tokens[i].Type == TokenType.LeftParen) //Expression in parenthesis
+            {
+                Parser.Expect(tokens, ref i, TokenType.LeftParen);
                 exp = Parse(tokens, ref i);
                 Parser.Expect(tokens, ref i, TokenType.RightParen);
             }
@@ -111,7 +116,7 @@ namespace CSubCompiler.AST
                 throw new ParserException("Unexpected token.", i, tokens[i]);
             }
 
-            if (UnaryPostOperatorNode.IsUnaryPostOperator(tokens, i))
+            if (Parser.CheckBoundsNoThrow(tokens, i) && UnaryPostOperatorNode.IsUnaryPostOperator(tokens, i))
             {
                 var opType = Operators.UnaryPostOperatorTokenTable[tokens[i].Type];
                 int opPrecedence = Operators.UnaryPostOperatorPrecedenceTable[opType];
