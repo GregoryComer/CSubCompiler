@@ -4,14 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-//TODO: ADD PROPER ERROR HANDLING TO LOOPS WHEN I EXCEEDS CODE LENGTH
-
 namespace CSubCompiler
 {
     public static class Lexer
     {
         delegate Token LexerMethod(string raw, ref int i);
-        static Dictionary<char, LexerMethod> LexerMap = new Dictionary<char,LexerMethod>()
+        static readonly Dictionary<char, LexerMethod> LexerMap = new Dictionary<char,LexerMethod>()
         {
             { '&', ProcessAmpersand },
             { '^', ProcessCaret },
@@ -65,6 +63,10 @@ namespace CSubCompiler
             {
                 t = ProcessString(raw, ref i);
             }
+            else if (first == '\'') //Handle chars
+            {
+                t = ProcessChar(raw, ref i);
+            }
             else if (char.IsNumber(first)) //Handle ints and floats (that do not begin with '.')
             {
                 t = ProcessNumber(raw, ref i);
@@ -75,7 +77,8 @@ namespace CSubCompiler
             }
             else //Unknown token, error
             {
-                throw new LexerException(string.Format("Unrecognized token beginning at index {0}: \"{1}\".", i, GetCodePreview(raw, i, 10)), i);
+                throw new LexerException(
+                    $"Unrecognized token beginning at index {i}: \"{GetCodePreview(raw, i, 10)}\".", i);
             }
 
             t.CodeIndex = startIndex;
@@ -91,13 +94,13 @@ namespace CSubCompiler
         }
         static Token ProcessAmpersand(string raw, ref int i)
         {
-            if (raw[i + 1] == '=') //&=
+            if (raw.Length > i + 1 && raw[i + 1] == '=') //&=
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.AmpersandEqual);
                 i += 2;
                 return t;
             }
-            else if (raw[i + 1] == '&') //&&
+            else if (raw.Length > i + 1 && raw[i + 1] == '&') //&&
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.DoubleAmpersand);
                 i += 2;
@@ -112,7 +115,7 @@ namespace CSubCompiler
         }
         static Token ProcessCaret(string raw, ref int i)
         {
-            if (raw[i + 1] == '=') //^=
+            if (raw.Length > i + 1 && raw[i + 1] == '=') //^=
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.CaretEqual);
                 i += 2;
@@ -127,64 +130,20 @@ namespace CSubCompiler
         }
         static Token ProcessChar(string raw, ref int i)
         {
+            i++; //Consume single quote
             char literal;
             if (raw[i] == '\\') //Handle escape characters
             {
                 i++;
-                switch (raw[i])
-                {
-                    case 'a':
-                        literal = '\x07';
-                        break;
-                    case 'b':
-                        literal = '\x08';
-                        break;
-                    case 'f':
-                        literal = '\x0C';
-                        break;
-                    case 'n':
-                        literal = '\x0A';
-                        break;
-                    case 'r':
-                        literal = '\x0D';
-                        break;
-                    case 't':
-                        literal = '\x09';
-                        break;
-                    case 'v':
-                        literal = '\x0B';
-                        break;
-                    case '\\':
-                        literal = '\\';
-                        break;
-                    case '\'':
-                        literal = '\'';
-                        break;
-                    case '\"':
-                        literal = '"';
-                        break;
-                    case '?':
-                        literal = '?';
-                        break;
-                    default:
-                        if (raw[i] == 'x') //Hex literal
-                        {
-                            int hexStartIndex = i;
-                            for (; IsHexDigit(raw[i]); i++) ;
-                            string hexLiteral = raw.Substring(hexStartIndex, i - hexStartIndex);
-                            literal = (char)Convert.ToInt32(hexLiteral, 16);
-                        }
-                        else //Octal literals are not supported
-                        {
-                            throw new LexerException(string.Format("Unknown escape sequence at index {0}.", i), i);
-                        }
-                        break;
-                }
+                literal = ProcessEscapeChar(raw, ref i);
+                i++;
             }
             else
             {
                 literal = raw[i];
+                i++;
             }
+            i++; //Consume single quote
             return new Token(literal.ToString(), TokenType.Char);
         }
         static Token ProcessComma(string raw, ref int i)
@@ -193,7 +152,7 @@ namespace CSubCompiler
         }
         static Token ProcessDivide(string raw, ref int i)
         {
-            if (raw[i + 1] == '=') // /=
+            if (raw.Length > i + 1 && raw[i + 1] == '=') // /=
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.DivideEqual);
                 i += 2;
@@ -208,11 +167,11 @@ namespace CSubCompiler
         }
         static Token ProcessDot(string raw, ref int i)
         {
-            if (char.IsNumber(raw[i + 1])) //Float literal
+            if (raw.Length > i + 1 && char.IsNumber(raw[i + 1])) //Float literal
             {
                 int literalStart = i;
                 i += 1; //Skip over '.'
-                for (; char.IsNumber(raw[i]); i++) ;
+                for (; i < raw.Length && char.IsNumber(raw[i]); i++) ;
                 return new Token(raw.Substring(literalStart, i - literalStart), TokenType.Float);
             }
             else //Dot
@@ -224,7 +183,7 @@ namespace CSubCompiler
         }
         static Token ProcessEqual(string raw, ref int i)
         {
-            if (raw[i + 1] == '=') //Token is '=='
+            if (raw.Length > i + 1 && raw[i + 1] == '=') //Token is '=='
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.DoubleEqual);
                 i += 2;
@@ -239,7 +198,7 @@ namespace CSubCompiler
         }
         static Token ProcessExclamation(string raw, ref int i)
         {
-            if (raw[i + 1] == '=') //Token is '!='
+            if (raw.Length > i + 1 && raw[i + 1] == '=') //Token is '!='
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.NotEqual);
                 i += 2;
@@ -254,19 +213,19 @@ namespace CSubCompiler
         }
         static Token ProcessGreater(string raw, ref int i)
         {
-            if (raw[i + 1] == '=') //Token is '>='
+            if (raw.Length > i + 1 && raw[i + 1] == '=') //Token is '>='
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.GreaterThanEqual);
                 i += 2;
                 return t;
             }
-            else if (raw.Substring(i, 3) == ">>=") //>>=
+            else if (raw.Length > i + 2 && raw.Substring(i, 3) == ">>=") //>>=
             {
                 Token t = new Token(raw.Substring(i, 3), TokenType.ShiftRightEqual);
                 i += 3;
                 return t;
             }
-            else if (raw.Substring(i, 2) == ">>")//>>
+            else if (raw.Length > i + 1 && raw.Substring(i, 2) == ">>")//>>
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.ShiftRight);
                 i += 2;
@@ -293,19 +252,19 @@ namespace CSubCompiler
         }
         static Token ProcessLess(string raw, ref int i)
         {
-            if (raw[i + 1] == '=') //Token is '<='
+            if (raw.Length > i + 1 && raw[i + 1] == '=') //Token is '<='
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.LessThanEqual);
                 i += 2;
                 return t;
             }
-            else if (raw.Substring(i, 3) == "<<=") //<<=
+            else if (raw.Length > i + 2 && raw.Substring(i, 3) == "<<=") //<<=
             {
                 Token t = new Token(raw.Substring(i, 3), TokenType.ShiftLeftEqual);
                 i += 3;
                 return t;
             }
-            else if (raw.Substring(i, 2) == "<<")//<<
+            else if (raw.Length > i + 1 && raw.Substring(i, 2) == "<<")//<<
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.ShiftLeft);
                 i += 2;
@@ -320,19 +279,19 @@ namespace CSubCompiler
         }
         static Token ProcessMinus(string raw, ref int i)
         {
-            if (raw[i + 1] == '-') //--
+            if (raw.Length > i + 1 && raw[i + 1] == '-') //--
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.DoubleMinus);
                 i += 2;
                 return t;
             }
-            else if (raw[i + 1] == '=') //-=
+            else if (raw.Length > i + 1 && raw[i + 1] == '=') //-=
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.MinusEquals);
                 i += 2;
                 return t;
             }
-            else if (raw[i + 1] == '>') //-=
+            else if (raw.Length > i + 1 && raw[i + 1] == '>') //->
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.Arrow);
                 i += 2;
@@ -347,15 +306,15 @@ namespace CSubCompiler
         }
         static Token ProcessMod(string raw, ref int i)
         {
-            if (raw[i + 1] == '=') //%=
+            if (raw.Length > i + 1 && raw.Length > i + 1 && raw[i + 1] == '=') //%=
             {
-                Token t = new Token(raw.Substring(i, 2), TokenType.PercentEqual);
+                Token t = new Token(raw.Substring(i, 2), TokenType.ModEqual);
                 i += 2;
                 return t;
             }
             else //%
             {
-                Token t = new Token(raw[i].ToString(), TokenType.Percent);
+                Token t = new Token(raw[i].ToString(), TokenType.Mod);
                 i += 1;
                 return t;
             }
@@ -368,7 +327,7 @@ namespace CSubCompiler
             if (i < raw.Length && raw[i] == '.') //Float literal
             {
                 i++;
-                for (; char.IsDigit(raw[i]); i++) ;
+                for (; i < raw.Length && char.IsDigit(raw[i]); i++) ;
                 return new Token(raw.Substring(startIndex, i - startIndex), TokenType.Float);
             }
             else //Int literal
@@ -378,15 +337,15 @@ namespace CSubCompiler
         }
         static Token ProcessPipe(string raw, ref int i)
         {
-            if (raw[i + 1] == '|') //||
+            if (raw.Length > i + 1 && raw[i + 1] == '|') //||
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.DoublePipe);
                 i += 2;
                 return t;
             }
-            else if (raw[i + 1] == '=') //|=
+            else if (raw.Length > i + 1 && raw[i + 1] == '=') //|=
             {
-                Token t = new Token(raw.Substring(i, 2), TokenType.PipeEquals);
+                Token t = new Token(raw.Substring(i, 2), TokenType.PipeEqual);
                 i += 2;
                 return t;
             }
@@ -399,15 +358,15 @@ namespace CSubCompiler
         }
         static Token ProcessPlus(string raw, ref int i)
         {
-            if (raw[i + 1] == '+') //++
+            if (raw.Length > i + 1 && raw[i + 1] == '+') //++
             {
                 Token t = new Token(raw.Substring(i, 2), TokenType.DoublePlus);
                 i += 2;
                 return t;
             }
-            else if (raw[i + 1] == '=') //+=
+            else if (raw.Length > i + 1 && raw[i + 1] == '=') //+=
             {
-                Token t = new Token(raw.Substring(i, 2), TokenType.PlusEquals);
+                Token t = new Token(raw.Substring(i, 2), TokenType.PlusEqual);
                 i += 2;
                 return t;
             }
@@ -436,9 +395,9 @@ namespace CSubCompiler
         }
         static Token ProcessStar(string raw, ref int i)
         {
-            if (raw[i + 1] == '=') //*=
+            if (raw.Length > i + 1 && raw[i + 1] == '=') //*=
             {
-                Token t = new Token(raw.Substring(i, 2), TokenType.StarEquals);
+                Token t = new Token(raw.Substring(i, 2), TokenType.StarEqual);
                 i += 2;
                 return t;
             }
@@ -458,55 +417,7 @@ namespace CSubCompiler
                 if (raw[i] == '\\') //Handle escape characters
                 {
                     i++;
-                    switch (raw[i])
-                    {
-                        case 'a':
-                            literal.Append('\x07');
-                            break;
-                        case 'b':
-                            literal.Append('\x08');
-                            break;
-                        case 'f':
-                            literal.Append('\x0C');
-                            break;
-                        case 'n':
-                            literal.Append('\x0A');
-                            break;
-                        case 'r':
-                            literal.Append('\x0D');
-                            break;
-                        case 't':
-                            literal.Append('\x09');
-                            break;
-                        case 'v':
-                            literal.Append('\x0B');
-                            break;
-                        case '\\':
-                            literal.Append('\\');
-                            break;
-                        case '\'':
-                            literal.Append('\'');
-                            break;
-                        case '\"':
-                            literal.Append('"');
-                            break;
-                        case '?':
-                            literal.Append('?');
-                            break;
-                        default:
-                            if (raw[i] == 'x') //Hex literal
-                            {
-                                int hexStartIndex = i;
-                                for (; IsHexDigit(raw[i]); i++) ;
-                                string hexLiteral = raw.Substring(hexStartIndex, i - hexStartIndex);
-                                literal.Append((char)Convert.ToInt32(hexLiteral, 16));
-                            }
-                            else //Octal literals are not supported
-                            {
-                                throw new LexerException(string.Format("Unknown escape sequence at index {0}: \"{1}\".", i, GetCodePreview(raw, i - 1, 10)), i);
-                            }
-                            break;
-                    }
+                    literal.Append(ProcessEscapeChar(raw, ref i));
                 }
                 else
                 {
@@ -516,6 +427,51 @@ namespace CSubCompiler
             i++; //Skip over closing quote
             return new Token(literal.ToString(), TokenType.String);
         }
+
+        private static char ProcessEscapeChar(string raw, ref int i)
+        {
+            switch (raw[i])
+            {
+                case 'a':
+                    return '\x07';
+                case 'b':
+                    return '\x08';
+                case 'f':
+                    return '\x0C';
+                case 'n':
+                    return '\x0A';
+                case 'r':
+                    return '\x0D';
+                case 't':
+                    return '\x09';
+                case 'v':
+                    return '\x0B';
+                case '\\':
+                    return '\\';
+                case '\'':
+                    return '\'';
+                case '\"':
+                    return '"';
+                case '?':
+                    return '?';
+                default:
+                    if (raw[i] == 'x') //Hex literal
+                    {
+                        i++;
+                        int hexStartIndex = i;
+                        for (; IsHexDigit(raw[i + 1]); i++) ;
+                        string hexLiteral = raw.Substring(hexStartIndex, i - hexStartIndex + 1);
+                        return (char) Convert.ToInt32(hexLiteral, 16);
+                    }
+                    else //Octal literals are not supported
+                    {
+                        throw new LexerException(
+                            $"Unknown escape sequence at index {i}: \"{GetCodePreview(raw, i - 1, 10)}\".",
+                            i);
+                    }
+            }
+        }
+
         static Token ProcessTilde(string raw, ref int i)
         {
             Token t = new Token(raw[i].ToString(), TokenType.Tilde);

@@ -15,7 +15,7 @@ namespace CSubCompiler.AST
         }
 
         public abstract ILType GetResultType(ILGenerationContext context);
-        public abstract bool IsLValue(ILGenerationContext context);
-        public abstract ILAddressingReference GenerateLValue(ILGenerationContext context);
+        public virtual bool IsLValue(ILGenerationContext context) { throw new NotImplementedException("Hit fallback IsLValue method."); }
+        public virtual ILAddressingReference GenerateLValue(ILGenerationContext context) { throw new NotImplementedException("Hit fallback GenerateLValue method."); }
     }
 }

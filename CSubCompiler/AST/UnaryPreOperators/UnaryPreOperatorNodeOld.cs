@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CSubCompiler.IL;
 using CSubCompiler.Language;
 
-namespace CSubCompiler.AST
+namespace CSubCompiler.AST.UnaryPreOperators
 {
-    public class UnaryPreOperatorNode : OperatorNode
+    /*public class UnaryPreOperatorNodeOld : OperatorNode
     {
         public UnaryPreOperatorType OperatorType;
         public SubExpressionNode Operand;
 
-        public UnaryPreOperatorNode(UnaryPreOperatorType operatorType, SubExpressionNode operand, Token token, int tokenIndex) : base(token, tokenIndex)
+        public UnaryPreOperatorNodeOld(UnaryPreOperatorType operatorType, SubExpressionNode operand, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             OperatorType = operatorType;
             Operand = operand;
@@ -29,13 +27,13 @@ namespace CSubCompiler.AST
             return Operators.IsUnaryPreOperator(tokens, i);
         }
 
-        public static UnaryPreOperatorNode Parse(Token[] tokens, ref int i)
+        public static UnaryPreOperatorNodeOld Parse(Token[] tokens, ref int i)
         {
             UnaryPreOperatorType opType = Operators.UnaryPreOperatorTokenTable[tokens[i].Type];
             int opPrecedence = Operators.UnaryPreOperatorPrecedenceTable[opType];
             i++; //Consume operator token
             SubExpressionNode operand = ExpressionNode.ParseQ(tokens, ref i, opPrecedence);
-            return new UnaryPreOperatorNode(opType, operand, tokens[i - 1], i - 1);
+            return new UnaryPreOperatorNodeOld(opType, operand, tokens[i - 1], i - 1);
         }
 
         public override ILType GetResultType(ILGenerationContext context)
@@ -260,5 +258,5 @@ namespace CSubCompiler.AST
             }
         }
         #endregion
-    }
+    }*/
 }

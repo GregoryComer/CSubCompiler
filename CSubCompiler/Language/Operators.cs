@@ -126,19 +126,19 @@ namespace CSubCompiler.Language
             { TokenType.LessThanEqual, BinaryOperatorType.LessEqual },
             { TokenType.Minus, BinaryOperatorType.Minus },
             { TokenType.MinusEquals, BinaryOperatorType.MinusEqual },
-            { TokenType.Percent, BinaryOperatorType.Mod },
-            { TokenType.PercentEqual, BinaryOperatorType.ModEqual },
+            { TokenType.Mod, BinaryOperatorType.Mod },
+            { TokenType.ModEqual, BinaryOperatorType.ModEqual },
             { TokenType.NotEqual, BinaryOperatorType.NotEqual },
             { TokenType.Pipe, BinaryOperatorType.Pipe },
-            { TokenType.PipeEquals, BinaryOperatorType.PipeEqual },
+            { TokenType.PipeEqual, BinaryOperatorType.PipeEqual },
             { TokenType.Plus, BinaryOperatorType.Plus },
-            { TokenType.PlusEquals, BinaryOperatorType.PlusEqual },
+            { TokenType.PlusEqual, BinaryOperatorType.PlusEqual },
             { TokenType.ShiftLeft, BinaryOperatorType.ShiftLeft },
             { TokenType.ShiftLeftEqual, BinaryOperatorType.ShiftLeftEqual },
             { TokenType.ShiftRight, BinaryOperatorType.ShiftRight },
             { TokenType.ShiftRightEqual, BinaryOperatorType.ShiftRightEqual },
             { TokenType.Star, BinaryOperatorType.Star },
-            { TokenType.StarEquals, BinaryOperatorType.StarEqual }
+            { TokenType.StarEqual, BinaryOperatorType.StarEqual }
         };
         public static Dictionary<TokenType, UnaryPreOperatorType> UnaryPreOperatorTokenTable = new Dictionary<TokenType, UnaryPreOperatorType>()
         {

@@ -1,19 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CSubCompiler.IL;
 using CSubCompiler.Language;
 
-namespace CSubCompiler.AST
+namespace CSubCompiler.AST.UnaryPostOperators
 {
-    public class UnaryPostOperatorNode : OperatorNode
+    /*public class UnaryPostOperatorNodeOld : OperatorNode
     {
         public UnaryPostOperatorType OperatorType;
         public SubExpressionNode Operand;
 
-        public UnaryPostOperatorNode(UnaryPostOperatorType operatorType, SubExpressionNode operand, Token token, int tokenIndex) : base(token, tokenIndex)
+        public UnaryPostOperatorNodeOld(UnaryPostOperatorType operatorType, SubExpressionNode operand, Token token, int tokenIndex) : base(token, tokenIndex)
         {
             OperatorType = operatorType;
             Operand = operand;
@@ -29,12 +27,12 @@ namespace CSubCompiler.AST
             return Operators.IsUnaryPostOperator(tokens, i);
         }
 
-        public static UnaryPostOperatorNode ParseWithOperand(Token[] tokens, ref int i, SubExpressionNode operand)
+        public static UnaryPostOperatorNodeOld ParseWithOperand(Token[] tokens, ref int i, SubExpressionNode operand)
         {
             UnaryPostOperatorType opType = Operators.UnaryPostOperatorTokenTable[tokens[i].Type];
             int opPrecedence = Operators.UnaryPostOperatorPrecedenceTable[opType];
             i++; //Consume operator token
-            return new UnaryPostOperatorNode(opType, operand, tokens[i - 1], i - 1);
+            return new UnaryPostOperatorNodeOld(opType, operand, tokens[i - 1], i - 1);
         }
 
         public override void GenerateIL(ILGenerationContext context)
@@ -137,5 +135,5 @@ namespace CSubCompiler.AST
             };
             return handlers.First(n => n.Key.Contains(OperatorType)).Value(operandType);
         }
-    }
+    }*/
 }

@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using CSubCompiler.IL;
 using CSubCompiler.Language;
+using CSubCompiler.AST.BinaryOperators;
+using CSubCompiler.AST.UnaryPostOperators;
+using CSubCompiler.AST.UnaryPreOperators;
 
 namespace CSubCompiler.AST
 {
@@ -47,11 +50,11 @@ namespace CSubCompiler.AST
                         SubExpressionNode right = ParseQ(tokens, ref i, (opAssoc == OperatorAssociativity.Left) ? opPrecedence - 1 : opPrecedence);
                         if (opAssoc == OperatorAssociativity.Left)
                         {
-                            val = new BinaryOperatorNode(opType, val, right, tokens[i], i);
+                            val = BinaryOperatorNodeFactory.Create(opType, val, right, tokens[i], i);
                         }
                         else //Right associative
                         {
-                            val = new BinaryOperatorNode(opType, val, right, tokens[i], i); //TEMPORARY, TODO: DETERMINE IF WORKS
+                            val = BinaryOperatorNodeFactory.Create(opType, val, right, tokens[i], i); //TEMPORARY, TODO: DETERMINE IF WORKS
                         }
                     }
                     else
@@ -67,7 +70,7 @@ namespace CSubCompiler.AST
 
                     if (opPrecedence <= q || (opPrecedence == q && opAssoc == OperatorAssociativity.Left))
                     {
-                        val = UnaryPostOperatorNode.ParseWithOperand(tokens, ref i, val);
+                        val = UnaryPostOperatorNodeFactory.Create(opType, val, tokens[i], i);
                     }
                 }
                 else
@@ -109,7 +112,14 @@ namespace CSubCompiler.AST
             }
             else if (UnaryPreOperatorNode.IsUnaryPreOperator(tokens, i))
             {
-                exp = UnaryPreOperatorNode.Parse(tokens, ref i);
+                var opType = Operators.UnaryPreOperatorTokenTable[tokens[i].Type];
+                int opPrecedence = Operators.UnaryPreOperatorPrecedenceTable[opType];
+                var opAssoc = Operators.UnaryPreOperatorAssociativityTable[opType];
+                i++;
+
+                var operand = ParseSubExpression(tokens, ref i, opPrecedence); // Todo: Check q value here
+
+                exp = UnaryPreOperatorNodeFactory.Create(opType, operand, tokens[i], i);
             }
             else
             {
@@ -124,7 +134,7 @@ namespace CSubCompiler.AST
 
                 if (opPrecedence <= q || (opPrecedence == q && opAssoc == OperatorAssociativity.Left))
                 {
-                    exp = UnaryPostOperatorNode.ParseWithOperand(tokens, ref i, exp);
+                    exp = UnaryPostOperatorNodeFactory.Create(opType, exp, tokens[i], i);
                 }
             }
 

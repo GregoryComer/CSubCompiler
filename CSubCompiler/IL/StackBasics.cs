@@ -25,7 +25,7 @@ namespace CSubCompiler.IL
     /// </summary>
     public struct ILPeek : IILGeneralInstruction
     {
-        public ulong Address;
+        public ILAddressingReference Address;
         public GeneralOperandSize Size;
     }
     /// <summary>

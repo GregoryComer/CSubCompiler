@@ -9,6 +9,6 @@ namespace CSubCompiler.AST
 {
     public abstract class OperatorNode : SubExpressionNode
     {
-        public OperatorNode(Token token, int tokenIndex) : base(token, tokenIndex) { }
+        protected OperatorNode(Token token, int tokenIndex) : base(token, tokenIndex) { }
     }
 }

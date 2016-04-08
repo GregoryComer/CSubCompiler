@@ -61,9 +61,9 @@ namespace CSubCompiler.Language
         {
             return FloatTypes.First(n => BaseTypeSizes[n] == size);
         }
-        public static BaseType GetIntegralTypeBySize(int size)
+        public static BaseType GetIntegralTypeBySize(int size, bool signed)
         {
-            return IntegralTypes.First(n => BaseTypeSizes[n] == size);
+            return IntegralTypes.First(n => (BaseTypeSizes[n] == size) && (IsSigned(n) == signed));
         }
         public static int GetPointerSize()
         {
@@ -80,6 +80,14 @@ namespace CSubCompiler.Language
         public static bool IsFloatType(BaseType type)
         {
             return FloatTypes.Contains(type);
+        }
+        public static bool IsSigned(BaseType type)
+        {
+            return IsIntegralType(type) && type.ToString().StartsWith("U"); //Todo: Better Implemeentation
+        }
+        public static bool IsUnsigned(BaseType type)
+        {
+            return !IsSigned(type);
         }
     }
     public enum BaseType
