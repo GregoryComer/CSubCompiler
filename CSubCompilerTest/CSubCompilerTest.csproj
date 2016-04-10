@@ -56,6 +56,11 @@
       <Name>CSubCompiler</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Parser\BinaryOperators\" />
+    <Folder Include="Parser\UnaryPostOperators\" />
+    <Folder Include="Parser\UnaryPreOperators\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

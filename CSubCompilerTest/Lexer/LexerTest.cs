@@ -186,6 +186,24 @@ namespace CSubCompilerTest.Lexer
             Assert.AreEqual(".23", tokens[0].Literal);
         }
 
+        [Test]
+        public void Lex_SimpleStatement()
+        {
+            string code = "x = 1 + 2";
+            var tokens = CSubCompiler.Lexer.Lex(code);
+            Assert.AreEqual(5, tokens.Length);
+            Assert.AreEqual(TokenType.AlphaNum, tokens[0].Type);
+            Assert.AreEqual(TokenType.Equal, tokens[1].Type);
+            Assert.AreEqual(TokenType.Int, tokens[2].Type);
+            Assert.AreEqual(TokenType.Plus, tokens[3].Type);
+            Assert.AreEqual(TokenType.Int, tokens[4].Type);
+            Assert.AreEqual("x", tokens[0].Literal);
+            Assert.AreEqual("=", tokens[1].Literal);
+            Assert.AreEqual("1", tokens[2].Literal);
+            Assert.AreEqual("+", tokens[3].Literal);
+            Assert.AreEqual("2", tokens[4].Literal);
+        }
+
         #region Util
         public void TestLexToken(string code, TokenType type)
         {
